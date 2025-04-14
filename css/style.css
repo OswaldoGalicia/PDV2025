@@ -1,0 +1,82 @@
+*{
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+body{
+	background-image: url(../img/fondoLogin.jpg);
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+h3{
+	font-family: 'Arial';
+	font-size: 20pt;
+	letter-spacing: 1px;
+	width: 100%;
+	background: #3f5c6e;
+	padding: 15px;
+	color: #FFF;
+	text-align: center;
+	text-transform: uppercase;
+	border-radius: 13px;
+	margin-block: 10px;
+}
+#container{
+	background: rgb(93 109 126 / 11%);
+	width: 100%;
+	height: 100vh;
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flex;
+	display: -o-flex;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#container form{
+	background: rgb(255 255 255 / 29%);
+	width: 30%;
+	height: 80%;
+	padding: 5px;
+	border-radius: 15px;
+}
+
+#container form img{
+	margin: 1px auto;
+	text-align: center;
+	display: block;	
+	height: 225px;
+	width: 225px;
+}
+#container form input{
+	width: 90%;
+	padding: 5px;
+	font-size: 16pt;
+	display: block;
+	margin: 20px auto;
+	border-radius: 10px;
+	border: 1px solid #ccc,
+}
+#container form input[type="submit"]{
+	background: #3f5c6e;
+	padding: 5px;
+	color: #fff;
+	letter-spacing: 1px;
+	border: 10;
+	cursor: pointer;
+	border-radius: 12px;
+}
+
+.alert{
+	font-family: 'Arial';
+	font-size: 20px;
+	text-align: center;
+	color: #FFF;
+}
+@media screen and (max-width: 460px){
+	#container form{
+		width: 90%;
+	}
+}
+

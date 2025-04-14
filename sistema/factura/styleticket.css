@@ -1,0 +1,111 @@
+@import url('fonts/BrixSansRegular.css');
+@import url('fonts/BrixSansBlack.css');
+
+*{
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+p, label, span, table{
+	font-family: 'BrixSansRegular';
+	font-size: 9pt;
+}
+.h2{
+	font-family: 'BrixSansBlack';
+	font-size: 12pt;
+	padding: 0px;
+}
+img{
+	width: 200px;
+}
+.h3{
+	font-family: 'BrixSansBlack';
+	font-size: 10pt;
+	display: block;
+	text-align: center;
+	padding: 0px;
+	margin-bottom: 2px;
+}
+#page_pdf{
+	width: 204pt;
+}
+
+#factura_head, #factura_cliente{
+	width: 100%;
+	border-collapse: collapse;
+}
+.logo_factura{
+	width: 100%;
+}
+.logo_factura img{
+	padding-left: 25%;
+	width: 100pt;
+}
+.info_empresa{
+	padding-top: 0;
+	width: 100%;
+	text-align: center;
+}
+.info_factura{
+	padding-top: 0;
+	width: 100%;
+	text-align: center;
+}
+.info_cliente{
+	padding-top: 0;
+	width: 100%;
+	text-align: center;
+}
+.datos_cliente{
+	padding-top: 0;
+	width: 100%;
+	text-align: center;
+}
+.datos_cliente{
+	padding-top: 0;
+	width: 100%;
+	text-align: center;
+}
+.textright{
+	text-align: right;
+}
+.textleft{
+	text-align: left;
+}
+.textcenter{
+	text-align: center;
+}
+#factura_detalle{
+	width: 100%;
+	padding: 5px;
+	border-collapse: collapse;
+}
+#factura_detalle thead th{
+	width: 100%;
+}
+#detalle_productos tr:nth-child(even) {
+    background: #ededed;
+}
+#detalle_totales span{
+	font-family: 'BrixSansBlack';
+}
+.nota{
+	width: 100%;
+	font-size: 8pt;
+	margin-top: 10px;
+	text-align: center;
+}
+.label_gracias{
+	width: 100%;
+	font-family: verdana;
+	font-weight: bold;
+	font-style: italic;
+	text-align: center;
+	margin-top: 10px;
+}
+.anulada{
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translateX(-50%) translateY(-50%);
+}
