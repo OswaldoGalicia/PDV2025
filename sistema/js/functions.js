@@ -4990,7 +4990,7 @@ function infoProductAgregar(codigo) {
                     $('.bodyModal').html('<form action="" method="post" name="form_del_product" id="form_del_product" onsubmit="event.preventDefault(); agregarProducto();">'+
                                             '<h2 class="nameProducto">'+info.codigo+'</h2>'+
                                             '<p>'+info.descripcion+'</p>'+
-                                            '<p>'+info.precio+'</p>'+
+                                            '<input class="textcenter" type="number" name="txt_precio_producto_venta" id="txt_precio_producto_venta" value="'+info.precio+'" required>'+
                                             '<h1> Ingrese la cantidad</h1>'+
                                             '<input class="textcenter" type="number" name="txt_cant_producto_venta" id="txt_cant_producto_venta" value="1" required>'+
                                             '<input type="hidden" name="txt_existencia_venta" id="txt_existencia_venta" value="'+info.existencia+'" required>'+
@@ -5006,7 +5006,7 @@ function infoProductAgregar(codigo) {
                     $('.modal').fadeIn();
                 }
                 $('#txt_cant_producto_venta').focus();
-                $('#busquedaProd').val('');
+                $('#busquedaProd').val(''); 
             },
 
             error: function(error){

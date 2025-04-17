@@ -7,13 +7,13 @@
 
 	if (!empty($_POST)) {
 
-			//$query = mysqli_query($conection,"SELECT * FROM caja WHERE usuario = $user AND status = 1");
-			$query_caja = mysqli_query($conection,"SELECT * FROM caja WHERE status = 1");
-			$result_caja = mysqli_num_rows($query_caja);
-			if ($result_caja > 0) {
-				 		$data_caja = mysqli_fetch_assoc($query_caja);
-				 		$id_caja = $data_caja['id'];
-			 		}
+		//$query = mysqli_query($conection,"SELECT * FROM caja WHERE usuario = $user AND status = 1");
+		$query_caja = mysqli_query($conection,"SELECT * FROM caja WHERE status = 1");
+		$result_caja = mysqli_num_rows($query_caja);
+		if ($result_caja > 0) {
+					$data_caja = mysqli_fetch_assoc($query_caja);
+					$id_caja = $data_caja['id'];
+				}
 
 		//extraer datos del producto
 		if ($_POST['action'] == 'infoProducto')
