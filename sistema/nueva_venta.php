@@ -125,7 +125,6 @@
 			var usuarioid = '<?php echo $_SESSION['idUser']; ?>';
 			var descuento = $('#descuneto_venta').val();
 			serchForDetalle(usuarioid,descuento);
-
 			var items = <?= json_encode($array); ?>;
 				    $('#nom_cliente').autocomplete({
 				        source: items

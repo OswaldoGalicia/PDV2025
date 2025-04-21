@@ -1,7 +1,7 @@
 $(document).ready(function(){
 
     $('#busquedaProd').focus();
-
+    
     $('.btnMenu').click(function(e){
         e.preventDefault();
         if ($('nav').hasClass('viewMenu')) 
@@ -1857,7 +1857,7 @@ function del_product_detalle(correlativo){
                         $('#txt_cod_producto').val('');
                         $('#txt_descripcion').html('-');
                         $('#txt_existencia').html('-');
-                        $('#txt_cant_producto').val('0');
+                        $('#txt_cant_producto').val('0.00');
                         $('#txt_precio').html('0.00');
                         $('#txt_precio_total').html('0.00');
                         $('#txt_cod_producto').focus();
@@ -1907,12 +1907,14 @@ function viewProcesarCompra(){
 }
 
 function serchForDetalle(id,descuento){
+    
     var action = 'serchForDetalle';
     var descuento = descuento;
     var user = id;
     if (descuento == '') {
         descuento = 0;
     }
+    console.log(user);
 
        $.ajax({
                 url : 'ajax.php',
@@ -1922,12 +1924,18 @@ function serchForDetalle(id,descuento){
 
                 success: function(response)
                 {
+                    console.log("🔍 Respuesta cruda:", response);
                     //console.log(response);
                   if (response != 'error')
                      {
-                        var info = JSON.parse(response);
-                        $('#detalle_venta').html(info.detalle);
-                        $('#detalle_totales').html(info.totales);
+                        try{
+
+                            var info = JSON.parse(response);
+                            $('#detalle_venta').html(info.detalle);
+                            $('#detalle_totales').html(info.totales);
+                        }catch(e){
+                            console.log("Error al parssear json : " + e);
+                        }
 
                      }else{
                         console.log('no data');
@@ -1936,7 +1944,7 @@ function serchForDetalle(id,descuento){
                      viewProcesar();
                 },
                 error: function(error){
-
+                    console.log("error muy cabron");
                 }
             });
 }
@@ -2141,11 +2149,13 @@ function agregarProducto(codigo){
             var codproducto = codigo;
             var existencia = parseInt($('#txt_existencia_venta').val());
             var cantidad = $('#txt_cant_producto_venta').val();
+            var precio = $('#txt_precio_producto_venta').val();
 
-            if (cantidad > existencia){
-                alert('No hay inventarios suficiente.');
-                return false;
-            }
+            // if (cantidad> existencia){
+            //     alert('No hay inventarios suficiente.');
+            //     return false;
+            // }
+        
 
             $.ajax({
                 url : 'ajax.php',
@@ -3462,7 +3472,7 @@ function listaVentas(busqueda,pagina,cantidad){
                         $('#txt_cod_producto').val('');
                         $('#txt_descripcion').html('-');
                         $('#txt_existencia').html('-');
-                        $('#txt_cant_producto').val('0');
+                        $('#txt_cant_producto').val('0.00');
                         $('#txt_precio').val('0.00');
                         $('#txt_precio_total').html('0.00');
 
@@ -4990,9 +5000,10 @@ function infoProductAgregar(codigo) {
                     $('.bodyModal').html('<form action="" method="post" name="form_del_product" id="form_del_product" onsubmit="event.preventDefault(); agregarProducto();">'+
                                             '<h2 class="nameProducto">'+info.codigo+'</h2>'+
                                             '<p>'+info.descripcion+'</p>'+
-                                            '<input class="textcenter" type="number" name="txt_precio_producto_venta" id="txt_precio_producto_venta" value="'+info.precio+'" required>'+
+                                            '<h1> Ingrese el precio </h1>'+
+                                            '<input class="textcenter" type="number" type="any" name="txt_precio_producto_venta" id="txt_precio_producto_venta" value="'+info.precio+'" required>'+
                                             '<h1> Ingrese la cantidad</h1>'+
-                                            '<input class="textcenter" type="number" name="txt_cant_producto_venta" id="txt_cant_producto_venta" value="1" required>'+
+                                            '<input class="textcenter" type="number" step="any" name="txt_cant_producto_venta" id="txt_cant_producto_venta" value="1" required>'+
                                             '<input type="hidden" name="txt_existencia_venta" id="txt_existencia_venta" value="'+info.existencia+'" required>'+
                                             '<input type="hidden" step="any" name="txt_precio_venta" id="txt_precio_venta" value="'+info.precio+'" required>'+
                                             '<input type="hidden" name="txt_codigo_venta" id="txt_codigo_venta" value="'+info.codigo+'" required>'+

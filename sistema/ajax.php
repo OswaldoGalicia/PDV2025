@@ -186,10 +186,11 @@
 		//Agregar producto al detalle temporal
 		if ($_POST['action'] == 'addProductoDetalle'){
 			//print_r($_POST);
-			if (empty($_POST['producto']) || empty($_POST['cantidad'])) 
+			if (empty($_POST['producto']) || empty($_POST['cantidad'] || empty($_POST['precio']))) 
 			{
 				echo 'error';
 			}else{
+				
 				$precio 	 = $_POST['precio'];
 				$codproducto = $_POST['producto'];
 				$cantidad    = $_POST['cantidad'];
@@ -214,7 +215,16 @@
 					$moned = $info_iva['moneda'];
 				}
 
+				$dat = array();
+
 				while ($data = mysqli_fetch_assoc($query_detalle_temp)) {
+					$dat[] = $data;
+				}
+				
+				$dat = array_reverse($datos);
+	
+				foreach( $dat as $data){
+					
 					$precioTotal1 = number_format($data['cantidad'] * $data['precio_venta'], 2);
 					$precioTotal  = round($data['cantidad'] * $data['precio_venta'], 2);
 					$sub_total    = round($sub_total + $precioTotal,2);
@@ -277,7 +287,7 @@
 													FROM detalle_temp tmp
 													INNER JOIN producto p
 													ON tmp.codproducto = p.codproducto
-													WHERE token_user = '$token' ");
+													WHERE token_user = '$token'");
 				$result = mysqli_num_rows($query);
 
 				$query_iva = mysqli_query($conection,"SELECT iva, moneda FROM configuracion");
@@ -296,7 +306,13 @@
 					$moned = $info_iva['moneda'];
 				}
 
+				$dat = array();
 				while ($data = mysqli_fetch_assoc($query)){
+					$dat[] = $data;
+				}
+				$dat = array_reverse($dat);
+
+				foreach($dat as $data){
 					$precioTotal1 = number_format($data['cantidad'] * $data['precio_venta'], 2);
 					$precioTotal  = $data['cantidad'] * $data['precio_venta'];
 					$sub_total    = $sub_total + $precioTotal;
@@ -382,6 +398,11 @@
 				}
 
 				while ($data = mysqli_fetch_assoc($query_detalle_temp)){
+					$datos[] = $data;
+					}
+					$datos = array_reverse($datos);
+	
+					foreach( $datos as $data){
 					$precioTotal1 = number_format($data['cantidad'] * $data['precio_venta'], 2);
 					$precioTotal  = $data['cantidad'] * $data['precio_venta'];
 					$sub_total    = $sub_total + $precioTotal;
@@ -746,7 +767,7 @@
 
 		if ($_POST['action'] == 'addProductoDetalle2'){
 			//print_r($_POST);
-			if (empty($_POST['txt_cod_producto_venta']) || empty($_POST['txt_cant_producto_venta'])) 
+			if (empty($_POST['txt_cod_producto_venta']) || empty($_POST['txt_cant_producto_venta']) || empty($_POST['txt_precio_producto_venta'])) 
 			{
 				echo 'error';
 			}else{
@@ -760,12 +781,13 @@
 				//$precio = $_POST['txt_precio_venta'];
 				$codproducto = $_POST['txt_cod_producto_venta'];
 				$cantidad    = $_POST['txt_cant_producto_venta'];
+				$precio 	 = $_POST['txt_precio_producto_venta'];
 				$token       = md5($_SESSION['idUser']);
 
 				$query_iva = mysqli_query($conection,"SELECT iva,moneda FROM configuracion");
 				$result_iva = mysqli_num_rows($query_iva);
 
-				$query_detalle_temp = mysqli_query($conection,"CALL add_detalle_temp($codproducto,$cantidad,'$token')");
+				$query_detalle_temp = mysqli_query($conection,"CALL add_detalle_temp($codproducto,$cantidad,'$token',$precio)");
 				$result = mysqli_num_rows($query_detalle_temp);
 
 				$detalleTabla = '';
@@ -781,7 +803,13 @@
 					$moned = $info_iva['moneda'];
 				}
 
+
 				while ($data = mysqli_fetch_assoc($query_detalle_temp)) {
+					$datos[] = $data;
+				}
+				$datos = array_reverse($datos);
+
+				foreach( $datos as $data){
 					$precioTotal1 = number_format($data['cantidad'] * $data['precio_venta'], 2);
 					$precioTotal  = $data['cantidad'] * $data['precio_venta'];
 					$sub_total    = $sub_total + $precioTotal;
