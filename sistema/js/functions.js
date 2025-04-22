@@ -391,7 +391,7 @@ $(document).ready(function(){
                  }else{
                     $('#txt_descripcion_compra').html('-');
                     $('#txt_existencia_compra').html('-');
-                    $('#txt_cant_producto_compra').val('0');
+                    $('#txt_cant_producto_compra').val('0.00');
                     $('#txt_precio_compra').html('0.00');
                     $('#txt_precio_total_compra').html('0.00');
 
@@ -783,7 +783,7 @@ $(document).ready(function(){
                                             '<h1><i class="fa fa-money-bill-alt fa-w-20" style="font-size: 45pt;"></i> <br> Abrir caja</h1>'+
                                             '<input type="hidden" name="action" value="nuevaCaja" required><br>'+
                                             '<label>Cantidad:</label>'+
-                                            '<input class="textcenter" type="number" name="inicioCaja" id="inicioCaja" value="" placeholder="C$ 0.00" required><br>'+
+                                            '<input class="textcenter" type="number" name="inicioCaja" id="inicioCaja" value="0" placeholder="C$ 0.00"><br>'+
                                             '<div class="alert alertAddProduct"></div>'+
                                             '<a href="#" class="btn_ok closeModal" onclick="coloseModal(); "><i class="fas fa-ban"></i> Cerrar</a>'+
                                             '<button type="submit" class="btn_new"><i class="fas fa-plus"></i> Guardar</button>'+              
@@ -4396,7 +4396,7 @@ function comprar(){
                         $('#txt_cod_producto_compra').val('');
                         $('#txt_descripcion_compra').html('-');
                         $('#txt_existencia_compra').html('-');
-                        $('#txt_cant_producto_compra').val('0');
+                        $('#txt_cant_producto_compra').val('0.00');
                         $('#txt_precio_compra').val('0.00');
                         $('#txt_precio_total_compra').html('0.00');
 
@@ -4447,7 +4447,7 @@ function comprar(){
                         $('#txt_cod_producto_compra').val('');
                         $('#txt_descripcion_compra').html('-');
                         $('#txt_existencia_compra').html('-');
-                        $('#txt_cant_producto_compra').val('0');
+                        $('#txt_cant_producto_compra').val('0.00');
                         $('#txt_precio_compra').html('0.00');
                         $('#txt_precio_total_compra').html('0.00');
                         $('#txt_cod_producto_compra').focus();
@@ -5103,7 +5103,7 @@ function infoProductAgregarCompra(codigo) {
                                             '<h2 class="nameProducto">'+info.codigo+'</h2>'+
                                             '<h1>'+info.descripcion+'</h1>'+
                                             '<label class="textcenter">Cantidad</label>'+
-                                            '<input class="textcenter" type="number" name="txt_cant_producto_compra" id="txt_cant_producto_compra" value="1" required>'+
+                                            '<input class="textcenter" type="number" step="any" name="txt_cant_producto_compra" id="txt_cant_producto_compra" value="1" required>'+
                                             '<label class="textcenter">Costo</label>'+
                                             '<input class="textcenter" type="number" step="any" name="txt_precio_compra" id="txt_precio_compra" value="'+info.costo+'" required>'+
                                             '<input type="hidden" name="txt_cod_producto_compra" id="txt_cod_producto_compra" value="'+info.codproducto+'" required>'+
@@ -5151,7 +5151,7 @@ function infoProductAgregarCompraEnter(codigo) {
                                             '<h2 class="nameProducto">'+info.codigo+'</h2>'+
                                             '<h1>'+info.descripcion+'</h1>'+
                                             '<label class="textcenter">Cantidad</label>'+
-                                            '<input class="textcenter" type="number" name="txt_cant_producto_compra" id="txt_cant_producto_compra" value="1" required>'+
+                                            '<input class="textcenter" type="number" step"any" name="txt_cant_producto_compra" id="txt_cant_producto_compra" value="1" required>'+
                                             '<label class="textcenter">Costo</label>'+
                                             '<input class="textcenter" type="number" step="any" name="txt_precio_compra" id="txt_precio_compra" value="'+info.costo+'" required>'+
                                             '<input type="hidden" name="txt_cod_producto_compra" id="txt_cod_producto_compra" value="'+info.codproducto+'" required>'+

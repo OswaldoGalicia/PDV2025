@@ -2284,29 +2284,29 @@ VALUES('$proveedor','$codigo','$producto','$costo','$precio','$usuario_id','$img
 		 if ($_POST['action'] == 'nuevaCaja'){
 		 	//print_r($_POST);
 		 	if (empty($_POST['inicioCaja'])) {
-		 		   $code = '1';
-	   			   $msg = "Todos los campos son abligatorios.";
+		 		   $cantidad = 0;
 		 	}else{
-				$cantidad 	= $_POST['inicioCaja'];
-				$user 		= $_SESSION['idUser'];
-				$result 	= 0;
-			
-				$query_insert = mysqli_query($conection,"INSERT INTO caja(inicio,usuario)
-					                                      			VALUES($cantidad,$user)");
-				
-			 	mysqli_close($conection);
-				if ($query_insert) {
-	   		     		$code = '00';
-	   		     		$msg = "Caja abierta correctamente";
-
-	   		     	}else{
-	   		     		$code = '2';
-	   		     		$msg = "Error al abrir la caja";
-	   		   }  	
+				 $cantidad 	= $_POST['inicioCaja'];
 			}
+			$user 		= $_SESSION['idUser'];
+			$result 	= 0;
+		
+			$query_insert = mysqli_query($conection,"INSERT INTO caja(inicio,usuario)
+																VALUES($cantidad,$user)");
+			
+			mysqli_close($conection);
+			if ($query_insert) {
+				$code = '00';
+				$msg = "Caja abierta correctamente";
+
+			}else{
+				$code = '2';
+				$msg = "Error al abrir la caja";
+			}  	
+		
 			$arrData = array('cod' => $code, 'msg' => $msg);
-	   		     echo json_encode($arrData,JSON_UNESCAPED_UNICODE);
-	   		     exit;	
+			echo json_encode($arrData,JSON_UNESCAPED_UNICODE);
+			exit;	
 		}
 
 		//Cerrar caja
