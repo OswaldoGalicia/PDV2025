@@ -1,4 +1,6 @@
-<?php 
+<?php
+
+use FontLib\Table\Type\post;
 
 	include "../conexion.php";
 	session_start();
@@ -326,8 +328,17 @@
 						                <td class="textright">'.$precio_venta.'</td>
 						                <td class="textright">'.$precioTotal1.'</td>
 						                <td class="">
-							                <a class="link_delete" href="#" onclick="event.preventDefault();
-							                  del_product_detalle('.$data['correlativo'].');"><i class="far fa-trash-alt"></i></a>
+											<div class="botones-editar-venta">
+												<a class="link_delete" href="#" onclick="event.preventDefault();
+												del_product_detalle('.$data['correlativo'].');"><i class="far fa-trash-alt"></i></a>
+												<a class="link_edit" href="#" onclick="event.preventDefault();
+												edit_product_detalle('.$data['correlativo'].');">
+													<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#3d7ba8" class="bi bi-pencil-square" viewBox="0 0 16 16">
+													<path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+													<path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+													</svg>
+												</a>
+											</div>
 						                </td>
 						             </tr>';
 				}
@@ -822,9 +833,16 @@
 						                <td colspan="3">'.$data['descripcion'].'</td>
 						                <td class="textright">'.$precio_venta.'</td>
 						                <td class="textright">'.$precioTotal1.'</td>
-						                <td class="">
+						                <td class="botones-editar-venta">
 							                <a class="link_delete" href="#" onclick="event.preventDefault();
 							                  del_product_detalle('.$data['correlativo'].');"><i class="far fa-trash-alt"></i></a>
+							                <a class="link_edit" href="#" onclick="event.preventDefault();
+							                  edit_product_detalle('.$data['correlativo'].');">
+											  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#3d7ba8" class="bi bi-pencil-square" viewBox="0 0 16 16">
+												<path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+												<path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+												</svg>
+												</a>
 						                </td>
 						             </tr>';
 				}
@@ -1819,12 +1837,12 @@ VALUES('$proveedor','$codigo','$producto','$costo','$precio','$usuario_id','$img
 	   	}
 
 	   //Extraer datos del detalle_temp_compra
-	   	if ($_POST['action'] == 'serchForDetalleCompra'){
+	  	if ($_POST['action'] == 'serchForDetalleCompra'){
 			if (empty($_POST['user'])) 
 			{
 				echo 'error';
 			}else{
-				
+		 		
 				$token = md5($_SESSION['idUser']);
 
 				$query = mysqli_query($conection,"SELECT tmp.correlativo,
@@ -1899,6 +1917,127 @@ VALUES('$proveedor','$codigo','$producto','$costo','$precio','$usuario_id','$img
 		exit;
 	   }
 
+	if ($_POST['action'] == 'editarDetalleVenta'){
+		if (empty($_POST['correlativo'])) 
+		{
+			echo 'error';
+		}else{
+			$correlativo = $_POST['correlativo'];
+			 
+			$query = mysqli_query($conection,"SELECT detalle_temp.correlativo, detalle_temp.codproducto,detalle_temp.cantidad,detalle_temp.costo, detalle_temp.precio_venta, producto.* from detalle_temp inner join producto on detalle_temp.codproducto = producto.codproducto where detalle_temp.correlativo = $correlativo");
+			$result = mysqli_num_rows($query);
+
+			if($result > 0){
+				$data = mysqli_fetch_assoc($query);
+				echo json_encode($data,JSON_UNESCAPED_UNICODE);
+			}else{
+				echo 'error';
+			}
+				
+		}
+		mysqli_close($conection);
+	
+	exit;
+   }
+
+   if($_POST['action']== 'editarProductoDetalle' ){
+		if(empty($_POST['action'])){
+			echo 'error';
+		}else{
+
+			$correlativo = $_POST['txt_correlativo'];
+			$cantanterior= $_POST['txt_cantanterior'];
+			$codproducto = $_POST['txt_cod_producto_venta'];
+			$cantidad    = $_POST['txt_cant_producto_venta'];
+			$precio 	 = $_POST['txt_precio_producto_venta'];
+			
+
+			$query_iva = mysqli_query($conection,"SELECT iva,moneda FROM configuracion");
+			$result_iva = mysqli_num_rows($query_iva);
+
+			$query_detalle_temp = mysqli_query($conection,"CALL edit_detalle_temp($correlativo,$cantanterior,$codproducto,$cantidad,$precio)");
+			$result = mysqli_num_rows($query_detalle_temp);
+
+			$detalleTabla = '';
+			$sub_total    = 0;
+			$iva          = 0;
+			$total        = 0;
+			$arrayData    = array();
+
+			if ($result > 0) {
+			   if ($result_iva > 0) {
+				$info_iva = mysqli_fetch_assoc($query_iva);
+				$iva = $info_iva['iva'];
+				$moned = $info_iva['moneda'];
+			}
+
+
+			while ($data = mysqli_fetch_assoc($query_detalle_temp)) {
+				$datos[] = $data;
+			}
+			$datos = array_reverse($datos);
+
+			foreach( $datos as $data){
+				$precioTotal1 = number_format($data['cantidad'] * $data['precio_venta'], 2);
+				$precioTotal  = $data['cantidad'] * $data['precio_venta'];
+				$sub_total    = $sub_total + $precioTotal;
+				$total        = $total + $precioTotal;
+				$precio_venta = number_format($data['precio_venta'],2);
+
+				$detalleTabla .= '<tr>
+									<td style="display:none;">'.$data['codproducto'].'</td>
+									 <td class="">'.$data['cantidad'].'</td>
+									<td colspan="3">'.$data['descripcion'].'</td>
+									<td class="textright">'.$precio_venta.'</td>
+									<td class="textright">'.$precioTotal1.'</td>
+									<td class="botones-editar-venta">
+										<a class="link_delete" href="#" onclick="event.preventDefault();
+										  del_product_detalle('.$data['correlativo'].');"><i class="far fa-trash-alt"></i></a>
+										<a class="link_edit" href="#" onclick="event.preventDefault();
+										  edit_product_detalle('.$data['correlativo'].');">
+										  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#3d7ba8" class="bi bi-pencil-square" viewBox="0 0 16 16">
+											<path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+											<path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+											</svg>
+											</a>
+									</td>
+								 </tr>';
+			}
+
+			$impuesto = round($sub_total * ($iva / 100), 2);
+			$tl_sniva = round($sub_total - $impuesto, 2);
+			$total_total = $tl_sniva + $impuesto;
+			$tl_sniva1 = number_format($sub_total - $impuesto, 2);
+			$impuesto1 = number_format($sub_total * ($iva / 100), 2);
+			//$desc      = number_format($total * $descuento,2);
+			$total_con_desc = number_format($total_total - $descuento,2);
+
+			$detalleTotales = '<tr>
+								   <td colspan="5" class="textright">Sub Total ' .$moned.'</td>
+								   <td class="textright">'.number_format($total_total,2).'</td>
+								   <td></td>
+							   </tr>
+							   <tr>
+								   <td colspan="5" class="textright">Descuento ' .$moned.'</td>
+								   <td class="textright">'.number_format($descuento,2).'</td>
+								   <td></td>
+							   </tr>
+							   <tr>
+								   <td colspan="5" class="textright">TOTAL ' .$moned.' </td>
+								   <td class="textright">'.$total_con_desc.'</td>
+								   <td></td>
+							   </tr>';
+
+			$arrayData['detalle'] = $detalleTabla;
+			$arrayData['totales'] = $detalleTotales;
+
+			echo json_encode($arrayData,JSON_UNESCAPED_UNICODE);	               
+		}else{
+			echo 'error';
+		}
+		mysqli_close($conection);
+	}
+   }
 	   	//Agregar producto al detalle temporal compras
 		if ($_POST['action'] == 'addProductoDetalleCompra'){
 			//print_r($_POST);

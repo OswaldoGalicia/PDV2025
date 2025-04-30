@@ -846,3 +846,11 @@ padding: 4px 15px;
 	float: left;
 	margin: 5pt;
 }
+
+/*edits Os Galicia*/
+.botones-editar-venta{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	align-items: center;
+}

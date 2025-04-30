@@ -102,7 +102,7 @@
 						<div class="wd50">
 						<div id="acciones_venta">
 							<a href="#" class="btn_ok textcenter" id="btn_anular_venta" onclick="event.preventDefault(); anularVent();"><i class="fas fa-ban"></i> Anular</a>
-							<a href="#" class="btn_new textcenter" id="btn_facturar_venta" style="display: none;" title="Procesar F10" onclick="event.preventDefault();facturar();"><i class="far fa-edit"></i> Procesar</a>
+							<a href="#" class="btn_new textcenter" id="btn_facturar_venta" style="display: none;" title="Procesar F10" onclick="event.preventDefault();formaPago();"><i class="far fa-edit"></i> Procesar</a>
 						</div>
 					</div>
 					</td>
