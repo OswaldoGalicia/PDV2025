@@ -1834,6 +1834,7 @@ function del_product_detalle(correlativo){
      var descuento = $('#descuneto_venta').val();
      var id_detalle = correlativo;
 
+     console.log(id_detalle);
      if (descuento == '') {
         descuento = 0;
      }
@@ -1910,7 +1911,7 @@ function edit_product_detalle(correlativo){
     var action = 'editarDetalleVenta';
     var corr = correlativo;
     var descuento = $('#descuneto_venta').val();
-
+    
         $.ajax({
             url: 'ajax.php',
             type: 'POST',
@@ -1959,7 +1960,6 @@ function editarProductoVenta(){
      var cantidad = $('#txt_cant_producto_venta').val();
      var precio = $('#txt_precio_producto_venta').val();
 
-
      $.ajax({
          url : 'ajax.php',
          type : "POST",
@@ -1990,10 +1990,39 @@ function editarProductoVenta(){
 
 }
 
+//indicar la forma de pago, deaqui se irá a facturar()
 function formaPago(){
+        $('.bodyModal').html('<form action="" method="post" name="formaPagoForm" id="formaPagoForm" onsubmit="event.preventDefault(); facturar();">'+
+                                '<h2 class="nameProducto">Forma de Pago</h2>'+
+                                '<h1> Seleccione el método de pago</h1>'+
+                    
+                                '<button class="botonesNuevos" type="button" onclick="seleccionaMetodoPago(\'efectivo\')">Efectivo</button>'+
+                                '<button class="botonesNuevos" type="submit" onclick="seleccionaMetodoPago(\'tarjeta\')">Tarjeta</button>'+
+                                
+                                '<div class="hidden" id="metodoEfectivo">'+
+                                    '<input type="hidden" name="formaPago" id="formaPago" value="efectivo" required >'+
+                                    '<label for="monto_efectivo">Efectivo recibido:</label>'+
+                                    '<input type="number" step="any" name="monto_efectivo" id="monto_efectivo">'+
+                                    '<button class="botonesNuevos" type="submit" onclick="coloseModal();">Aceptar</button>'+
+                                '</div>'+
+                                '<a href="#" class="btn_cancel" onclick="coloseModal();"><i class="fas fa-ban"></i> Regresar</a>'+            
+                            '</form>');
+        $('.modal').fadeIn();
 
 }
 
+function seleccionaMetodoPago(metodo){
+    if(metodo === 'efectivo'){
+        document.getElementById('metodoEfectivo').classList.remove('hidden');
+        document.getElementById('formaPago').value='efectivo';
+        document.getElementById('monto_efectivo').setAttribute('required', null);
+    }else if(metodo === 'tarjeta'){
+        document.getElementById('metodoEfectivo').classList.add('hidden');
+        document.getElementById('monto_efectivo').removeAttribute('required', null);
+        document.getElementById('formaPago').value='tarjeta';
+        coloseModal();
+    }
+}
 
 function serchForDetalle(id,descuento){
     
@@ -3587,18 +3616,20 @@ function listaVentas(busqueda,pagina,cantidad){
         {
             var action = 'procesarVenta';
             var codcliente = $('#idcliente').val();
-            var tipoPago = $('#tipo_pago').val();
+            var status = $('#tipo_pago').val();
             var descuento = $('#descuneto_venta').val();
             var comprobante = $('#comprobante').val();
+            var formaDPago = $('#formaPago').val();
+            var monto = $('#monto_efectivo').val();
             if (descuento == '') {
                 descuento = 0;
             }
-
+            console.log("ID: "+codcliente + ' Status: '+status+' descuento: '+descuento + " formaPago:"+formaDPago);
             $.ajax({
                 url : 'ajax.php',
                 type: "POST",
                 async : true,
-                data: {action:action,codcliente:codcliente,tipoPago:tipoPago,descuento:descuento},
+                data: {action:action,codcliente:codcliente,status:status,descuento:descuento,formaDPago:formaDPago,monto:monto},
 
                 success: function(response)
                 {
@@ -3617,6 +3648,7 @@ function listaVentas(busqueda,pagina,cantidad){
                     }
                 },
                 error: function(error){
+                    console.log(error);
                 }
             });
         }

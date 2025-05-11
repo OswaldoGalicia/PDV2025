@@ -48,7 +48,7 @@
 			if($venta['status'] == 2){
 				$anulada = '<img class="anulada" src="img/anulado.png" alt="Anulada">';
 			}
-
+ 
 			$query_productos = mysqli_query($conection,"SELECT p.descripcion,dt.cantidad,dt.precio_venta,(dt.cantidad * dt.precio_venta) as precio_total,p.codigo
 														FROM venta f
 														INNER JOIN detalleventa dt

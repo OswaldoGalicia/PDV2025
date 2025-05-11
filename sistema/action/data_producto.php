@@ -47,11 +47,12 @@
 
 				}
 				
+				
 				$result = mysqli_num_rows($query);
 				$lista = '';
 				$tabla = '';
 				$arrayData    = array();
-
+				
 				if ($result > 0) {
 				  $tabla .= '<div class="divContainer">
 				  				<div class="dashboardventa">';

@@ -854,3 +854,16 @@ padding: 4px 15px;
 	justify-content: space-around;
 	align-items: center;
 }
+.hidden{
+	display:none;
+}
+.botonesNuevos{
+	padding: .5rem 1rem;
+	border: 1px solid #FFF ;
+	background-color: #239baa;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1.5rem;
+	border-radius: 10px;
+	margin: 0 2rem;
+	color: #fff;
+}

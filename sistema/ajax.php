@@ -507,24 +507,48 @@ use FontLib\Table\Type\post;
 	   			$tipo_pago 	= 1;
 	   		}else{
 	   			$codcliente = $_POST['codcliente'];
-	   			$tipo_pago = $_POST['tipoPago'];
+	   			$tipo_pago = $_POST['status'];
 	   		}
 	   		$descuento = $_POST['descuento'];
 	   		$token   = md5($_SESSION['idUser']);
 	   		$usuario = $_SESSION['idUser'];
+			$formaDPago = $_POST['formaDPago'];
+			$monto = $_POST['monto'];
 
-	   		$query = mysqli_query($conection,"SELECT * FROM detalle_temp WHERE token_user = '$token'");
-	   		$result = mysqli_num_rows($query);
+			if($monto == ''){
+				$monto = 1;
+			}
+			
+			$query = mysqli_query($conection,"SELECT * FROM detalle_temp WHERE token_user = '$token'");
+			$result = mysqli_num_rows($query);
+			
+			// ver datos e insertarlos en consulta directa a la bd
+			// $datosDebug = array(
+			// 	'usuario'     => $usuario,
+			// 	'codcliente'  => $codcliente,
+			// 	'token'       => $token,
+			// 	'tipo_pago'   => $tipo_pago,
+			// 	'id_caja'     => $id_caja,
+			// 	'descuento'   => $descuento,
+			// 	'formaDPago'  => $formaDPago,
+			// 	'monto'       => $monto
+			// );
+			
+			// print_r($datosDebug);
+			// exit;
 
-	   		if ($result > 0)
-	   		 {
-			   	$query_procesar = mysqli_query($conection,"CALL procesar_venta($usuario,$codcliente,'$token',$tipo_pago,$id_caja,$descuento)");
-			   	$result_detalle = mysqli_num_rows($query_procesar);
+			if ($result > 0)
+			{
 
+				$query_procesar = mysqli_query($conection,"CALL procesar_venta($usuario,$codcliente,'$token',$tipo_pago,$id_caja,$descuento,'$formaDPago',$monto)");
+				$result_detalle = mysqli_num_rows($query_procesar);
+				
+				
 			   	if ($result_detalle > 0) {
 			   		$data = mysqli_fetch_assoc($query_procesar);
 			   		echo json_encode($data,JSON_UNESCAPED_UNICODE);
 			   	}else{
+
 			   		echo 'error';
 			   	}
 	   		}else{
@@ -1918,7 +1942,8 @@ VALUES('$proveedor','$codigo','$producto','$costo','$precio','$usuario_id','$img
 	   }
 
 	if ($_POST['action'] == 'editarDetalleVenta'){
-		if (empty($_POST['correlativo'])) 
+		
+		if ($_POST['correlativo'] === '') 
 		{
 			echo 'error';
 		}else{
@@ -1926,7 +1951,7 @@ VALUES('$proveedor','$codigo','$producto','$costo','$precio','$usuario_id','$img
 			 
 			$query = mysqli_query($conection,"SELECT detalle_temp.correlativo, detalle_temp.codproducto,detalle_temp.cantidad,detalle_temp.costo, detalle_temp.precio_venta, producto.* from detalle_temp inner join producto on detalle_temp.codproducto = producto.codproducto where detalle_temp.correlativo = $correlativo");
 			$result = mysqli_num_rows($query);
-
+			
 			if($result > 0){
 				$data = mysqli_fetch_assoc($query);
 				echo json_encode($data,JSON_UNESCAPED_UNICODE);
@@ -2037,6 +2062,10 @@ VALUES('$proveedor','$codigo','$producto','$costo','$precio','$usuario_id','$img
 		}
 		mysqli_close($conection);
 	}
+   }
+   //ingresar la forma de pag
+   if($_POST['action'] == 'ingresarFormaPago'){
+
    }
 	   	//Agregar producto al detalle temporal compras
 		if ($_POST['action'] == 'addProductoDetalleCompra'){
