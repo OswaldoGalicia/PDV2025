@@ -53,7 +53,7 @@
 														AND e.codproducto = '$codproducto'
 														AND e.status = 1");
 							
-				}
+				} 
 
 				$result_reporte_producto = mysqli_num_rows($query_reporte_producto);
 				$result_reporte_producto_venta = mysqli_num_rows($query_reporte_producto_venta);

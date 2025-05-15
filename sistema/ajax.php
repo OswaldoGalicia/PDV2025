@@ -1300,10 +1300,12 @@ use FontLib\Table\Type\post;
 
 	   			$id = $_POST['producto'];
 
-	   			$query = mysqli_query($conection,"SELECT p.codproducto,p.codigo,p.descripcion,p.costo,p.precio,p.foto,pr.codproveedor,pr.proveedor 
+	   			$query = mysqli_query($conection,"SELECT p.codproducto,p.codigo,p.descripcion, c.categoria , p.costo,p.precio,p.foto,pr.codproveedor,pr.proveedor 
 														FROM producto p
 														INNER JOIN proveedor pr 
 														ON p.proveedor = pr.codproveedor
+														INNER JOIN categorias c
+														ON c.id_categoria = p.categoria 
 														WHERE p.codproducto = $id AND p.status != 10");
 
 	   			$result = mysqli_num_rows($query);
@@ -1311,13 +1313,23 @@ use FontLib\Table\Type\post;
 	   				$data = mysqli_fetch_assoc($query);
 					}
 					$query_prov= mysqli_query($conection,"SELECT * FROM proveedor");
+					$query_cat = mysqli_query($conection, "SELECT * FROM categorias");
 					$result_prov= mysqli_num_rows($query_prov);
 					mysqli_close($conection);
 					$proveedor= '';
 					while ($data_prov= mysqli_fetch_array($query_prov)) {
 						$proveedor.='<option value="'.$data_prov['codproveedor'].'">'.$data_prov['proveedor'].'</option>';
 					}
-					$arrData = array('proveedor' => $proveedor, 'producto' => $data);
+					$categorias = '';
+					while($data_cat = mysqli_fetch_array($query_cat)){
+						if($data['categoria'] == $data_cat['categoria']){
+							$categorias .= '<option value="'.$data_cat['id_categoria'].'" selected >'.$data_cat['categoria'].'</option>';
+						}else{
+							$categorias .= '<option value="'.$data_cat['id_categoria'].'">'.$data_cat['categoria'].'</option>';
+						}
+					}
+					
+					$arrData = array('proveedor' => $proveedor, 'producto' => $data, 'cat' => $categorias);
 			   		     echo json_encode($arrData,JSON_UNESCAPED_UNICODE);
 			   		     //echo json_encode($data,JSON_UNESCAPED_UNICODE);
 			   			 exit;
@@ -1340,6 +1352,7 @@ use FontLib\Table\Type\post;
 	   		     	$producto 	= $_POST['nombreProducto'];
 	   		     	$costo 		= $_POST['costoProducto'];
 	   		     	$precio 	= $_POST['prcioProducto'];
+					$categoria  = $_POST['categoriaProducto'];
 	   		     	
 	   		     	$foto = $_FILES['foto'];
 					$nombre_foto = $foto['name'];
@@ -1359,6 +1372,7 @@ use FontLib\Table\Type\post;
 															SET codigo 		= '$codigo',
 	   		     												descripcion = '$producto',
 	   		     												proveedor 	= $proveedor,
+																categoria   = $categoria,
 	   		     												costo 		= $costo,
 	   		     												precio 		= $precio,
 	   		     												foto 		= '$imgProducto'
@@ -1367,6 +1381,7 @@ use FontLib\Table\Type\post;
 						$query_update = mysqli_query($conection," UPDATE producto 
 															SET codigo 		= '$codigo',
 	   		     												descripcion = '$producto',
+																categoria   = $categoria,
 	   		     												proveedor 	= $proveedor,
 	   		     												costo 		= $costo,
 	   		     												precio 		= $precio
@@ -2063,10 +2078,84 @@ VALUES('$proveedor','$codigo','$producto','$costo','$precio','$usuario_id','$img
 		mysqli_close($conection);
 	}
    }
-   //ingresar la forma de pag
-   if($_POST['action'] == 'ingresarFormaPago'){
+   		if($_POST['action'] == 'mostrarCategorias'){
+			$pagina = $_POST['pagina'];
+			$antidad = $_POST['cantidad'];
+			$info = '<table>
+						<tr>
+							<th>Categoria</th>
+							<th class="">Acciones</th>
+						</tr>
+					';
+			$queryCategorias = mysqli_query($conection, "SELECT * FROM categorias");
+			
+			if(mysqli_num_rows($queryCategorias) > 0){
+				while($datos = mysqli_fetch_assoc($queryCategorias)){
+					$info .='
+					<tr>
+						<td class = "" colspan = "">'.$datos['categoria'].'</td>
+						<td class="separacionBotones">
+							<a class="link_edit" href="#" onclick="event.preventDefault(); editarCategoria('.$datos['id_categoria'].'); " >
+							Editar
+							</a>
+							<a class="link_delete" href="#" onclick="event.preventDefault(); borrarCategoria('.$datos['id_categoria'].')" >
+							Borrar
+							</a>
+						</td>
+					</tr>
+					';
+				}
+				$info .= '</table>';
+				echo json_encode($info, JSON_UNESCAPED_UNICODE);
+			}else{
+				echo 'error';
+			}
+		}
 
-   }
+		if($_POST['action'] == 'ingresoNuevaCategoria'){
+			if(empty($_POST['txt_nueva_categoria'])){
+				echo 'error';
+			}else{
+				$categoriaNueva = $_POST['txt_nueva_categoria'];
+				$query = "INSERT INTO categorias (categoria) values ('$categoriaNueva')";
+				mysqli_query($conection, $query);
+			}
+		}
+		if($_POST['action'] == 'borrarCategoria'){
+			if(empty($_POST['id'])){
+				echo 'error';
+			}else{
+				$id = $_POST['id'];
+				$query = "DELETE FROM categorias WHERE id_categoria = $id";
+				mysqli_query($conection, $query);
+			}
+		}
+		if($_POST['action'] == 'obtCateg'){
+			if(empty($_POST['id'])){
+				echo 'error';
+			}else{	
+				$id = $_POST['id'];
+				$query = "SELECT * FROM categorias WHERE id_categoria = '$id'";
+				$res = mysqli_query($conection, $query);
+				$data = mysqli_fetch_assoc($res);
+				$datos['id'] = $data['id_categoria'];
+				$datos['categoria'] = $data['categoria'];
+				echo json_encode($datos, JSON_UNESCAPED_UNICODE);
+				
+			}
+		}
+
+		if($_POST['action'] == 'informacionCategoriaEdit'){
+			$id = $_POST['idCategoria'];
+			$categoria = $_POST['txt_categoria_edit'];
+			if(empty($_POST['idCategoria']) || empty($_POST['txt_categoria_edit'])){
+				echo 'error';
+			}else{
+				$query = "UPDATE categorias SET  categoria = '$categoria' WHERE id_categoria = $id";
+				mysqli_query($conection, $query);
+			}
+
+		}
 	   	//Agregar producto al detalle temporal compras
 		if ($_POST['action'] == 'addProductoDetalleCompra'){
 			//print_r($_POST);

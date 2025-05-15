@@ -40,9 +40,11 @@
 			$desde = ($pagina-1) * $por_pagina;
 			$total_pagina = ceil($total_registro / $por_pagina);
 
-				$query = mysqli_query($conection,"SELECT p.codproducto, p.codigo, p.descripcion,p.costo, p.precio, p.existencia, pr.proveedor, p.foto, p.status FROM producto p
+				$query = mysqli_query($conection,"SELECT p.codproducto, p.codigo, p.descripcion, c.categoria ,p.costo, p.precio, p.existencia, pr.proveedor, p.foto, p.status FROM producto p
 						INNER JOIN proveedor pr
 						ON p.proveedor = pr.codproveedor
+						INNER JOIN categorias c
+						ON p.categoria = c.id_categoria
 						WHERE (p.codigo LIKE '%$busqueda%' OR
 						p.descripcion LIKE '%$busqueda%' OR 
 						pr.proveedor LIKE '%$busqueda%')
@@ -59,6 +61,7 @@
 										<th style="display:none;">ID</th>
 										<th>Código</th>
 										<th>Descripción</th>
+										<th>Categoria</th>
 										<th>Existencia</th>
 										<th>Costo</th>
 										<th>Precio</th>
@@ -84,6 +87,7 @@
 						                <td style="display:none;">'.$data['codproducto'].'</td>
 						                <td>'.$data['codigo'].'</td>
 						                <td colspan="">'.$data['descripcion'].'</td>
+										<td class="">'.$data['categoria'].'</td>
 						                <td class="">'.$data['existencia'].'</td>
 						                <td class="">'.$moned.' '.$costo.'</td>
 						                <td class="">'.$moned.' '.$precio.'</td>
@@ -103,6 +107,7 @@
 						                <td style="display:none;">'.$data['codproducto'].'</td>
 						                <td>'.$data['codigo'].'</td>
 						                <td colspan="">'.$data['descripcion'].'</td>
+										<td class="">'.$data['categoria'].'</td>
 						                <td class="">'.$data['existencia'].'</td>
 						                <td class="">'.$moned.' '.$precio.'</td>
 						                <td class="">'.$data['proveedor'].'</td>

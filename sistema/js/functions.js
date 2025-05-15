@@ -1122,6 +1122,7 @@ $(document).ready(function(){
     });
 
        listaCompras('',1,10);
+       listaCategorias(1,10);
 
     $('#busquedaCompra').focus();
     $('#busquedaCompra').keyup(function(e){
@@ -3136,6 +3137,7 @@ function listaProductos(busqueda,pagina,cantidad){
                                                     '<tr>'+
                                                         '<th>Código</th>'+
                                                         '<th>Descripción</th>'+
+                                                        '<th>Categoria</th>'+
                                                         '<th>Precio</th>'+
                                                         '<th>Existencia</th>'+
                                                         '<th>Proveedor</th>'+
@@ -3230,6 +3232,7 @@ function listaProductos(busqueda,pagina,cantidad){
                                             '<select name="nombreProveedorProd" id="nombreProveedorProd" required><option value="'+info.producto.codproveedor+'">'+info.producto.proveedor+'</option>'+info.proveedor+'</select><br>'+
                                             '<input type="text" name="codigoProducto" id="codigoProducto" value="'+info.producto.codigo+'" placeholder="Código del producto" required><br>'+
                                             '<input type="text" name="nombreProducto" id="nombreProducto" value="'+info.producto.descripcion+'" placeholder="Nombre del producto" required><br>'+
+                                            '<select name="categoriaProducto" id="categoriaProducto" required>'+info.cat+'</select><br>'+ //<option value="'+info.producto.id_categoria+'">'+info.producto.categoria+'</option>
                                             '<input step="any" type="number" name="costoProducto" id="costoProducto" value="'+info.producto.costo+'" placeholder="Costo del producto" required><br>'+
                                             '<input step="any" type="number" name="prcioProducto" id="prcioProducto" value="'+info.producto.precio+'" placeholder="Prcio del producto" required>'+
                                             '<div class="photo"><label for="foto"></label><div class="prevPhoto">'+
@@ -4709,6 +4712,116 @@ function listaCompras(busqueda,pagina,cantidad){
             });
 }
 
+function listaCategorias(pagina, cantidad){
+    $.ajax({
+        url: 'ajax.php',
+        type: 'POST',
+        data:{action:'mostrarCategorias', pagina:pagina, cantidad:cantidad},
+        success: function(response){
+            if(response != 'error'){
+                var info = JSON.parse(response);
+                $('#listaCategorias').html(info);
+                // $('#paginadorCategorias').html(info);
+            }else{
+                $('#listaCategorias').html('<table>'+
+                                            '<tr>'+
+                                                '<th>Categoria</th>'+
+                                                '<th class="textright">Acciones</th>'+
+                                            '</tr>'+ 
+                                            '<tbody>'+
+                                            '<tr><td colspan="7">No se encontraron concidencias :(</td></tr>'+
+                                            '</tbody></table>');
+                $('paginadorCategorias').html('');
+            }
+        }, 
+        error: function(error){
+
+        }
+    });
+}
+
+function nuevaCategoria(){
+    $('.bodyModal').html('<form action="" method="post" name="nuevaCategoriaForm" id="nuevaCategoriaForm" onsubmit="event.preventDefault(); subirCategoria();">'+
+                            '<h2 class="nameProducto">Agregar nueva categoria</h2>'+
+                            '<h1>Ingrese el nombre de la categoria</h1>'+
+                            '<input class="textcenter" type="text" name="txt_nueva_categoria" id="txt_nueva_categoria" placeholder="Nombre de categoria nueva" required>'+
+                            '<input type="hidden" name="action" value="ingresoNuevaCategoria" required>'+
+                            '<a href="#" class="btn_cancel" onclick="coloseModal();"><i class="fas fa-ban"></i> Cerrar</a>'+
+                            '<button type="submit" class="btn_ok"><i class="fas fa-plus"></i> Agregar</button>'+             
+                        '</form>');
+    $('.modal').fadeIn();
+}
+function subirCategoria(){
+    console.log($('#nuevaCategoriaForm').serialize());
+
+    $.ajax({
+        url:'ajax.php',
+        type:'POST',
+        async: true,
+        data: $('#nuevaCategoriaForm').serialize(),
+        success: function(response){
+            location.reload();
+        },
+        error: function(error){
+            console.log("error al agregar categoria");
+        }
+
+    });
+}
+function editarCategoria(id){
+    var id = id;
+    var action = 'obtCateg'
+    $.ajax({
+        url: 'ajax.php',
+        type: 'POST',
+        async: true,
+        data: {action:action,id:id},
+        success:function(response){
+            var data = JSON.parse(response);
+            console.log(data);
+            $('.bodyModal').html('<form action="" method="post" name="datosEditCategoria" id="datosEditCategoria" onsubmit="event.preventDefault(); subirCategoriaEditada();">'+
+                '<h2 class="nameProducto">Editar categoria: "'+data.categoria+'"</h2>'+
+                '<input class="textcenter" type="text" name="txt_categoria_edit" id="txt_id_categoria" value="'+data.categoria+'" required>'+
+                '<input type="hidden" name="action" value="informacionCategoriaEdit" required>'+
+                '<input type="hidden" name="idCategoria" value="'+data.id+'" required>'+
+                '<a href="#" class="btn_cancel" onclick="coloseModal();"><i class="fas fa-ban"></i> Cerrar</a>'+
+                '<button type="submit" class="btn_ok"><i class="fas fa-plus" onclick="closeModal();"></i> Agregar</button>'+             
+            '</form>');
+            $('.modal').fadeIn();
+        }, error: function(error){
+            console.log("Hubo un error al obtener la informacion de la BD");
+        }
+    });
+}
+
+function subirCategoriaEditada(){
+    $.ajax({
+        url: 'ajax.php',
+        type: 'POST',
+        async: true,
+        data: $('#datosEditCategoria').serialize(),
+        success: function(){
+            location.reload();
+        }
+    });
+}
+
+function borrarCategoria(id){
+    var id = id;
+    $.ajax({
+        url: 'ajax.php',
+        type: 'POST',
+        async: true,
+        data: {action:'borrarCategoria', id:id},
+        success: function(){
+            location.reload();
+        },
+        error: function(error){
+            console.log("error al borrar categoria ): ");
+        }
+    });
+    
+}
  //Registrar cliente
 function devolucion(){
 

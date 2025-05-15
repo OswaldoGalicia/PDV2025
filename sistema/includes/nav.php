@@ -41,6 +41,7 @@
 				if ($_SESSION['rol'] == 1 || $_SESSION['rol'] == 2) {
 				
 				?>
+						<li><a href="categoria.php"><i class="far fa-file-alt fa-w-12"></i> Categoria</a></li>
 						<li><a href="reabastecer_producto.php"><i class="fas fa-cart-plus"></i> Reabastecer</a></li>
 						<li><a href="compras.php"><i class="far fa-file-alt fa-w-12"></i> Compras</a></li>
 						<?php  } ?>

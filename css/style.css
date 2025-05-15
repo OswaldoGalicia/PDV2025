@@ -80,3 +80,9 @@ h3{
 	}
 }
 
+
+.separacionBotones{
+	display: flex;
+	flex-direction: row;
+	gap: 3rem;
+}
