@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 22-04-2025 a las 02:41:22
+-- Tiempo de generación: 29-05-2025 a las 00:41:36
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -365,6 +365,30 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `del_detalle_temp_compra` (IN `id_de
             WHERE tmp.token_user = token;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `edit_detalle_temp` (IN `correlativo` INT, IN `cantanterior` DECIMAL(10,2), IN `codprod` INT, IN `cantidad` DECIMAL(10,2), IN `precio` DECIMAL(10,2))   BEGIN
+    
+    	DECLARE precio_actual decimal(10,2);
+        DECLARE costo_actual decimal(10,2);
+        DECLARE existencia_actual decimal(10,2);
+        DECLARE nueva_existencia decimal(10,2);
+                
+        UPDATE detalle_temp SET cantidad = cantidad ,precio_venta = precio WHERE codproducto = codprod;
+        
+        SELECT existencia INTO existencia_actual FROM producto WHERE codproducto = codprod;
+	
+    	IF (cantanterior- cantidad) >= 0 THEN
+    		SET nueva_existencia = existencia_actual + cantanterior - cantidad;
+       	ELSE
+        	SET nueva_existencia = existencia_actual - (cantanterior - cantidad);
+        END IF;
+        UPDATE producto SET existencia = nueva_existencia WHERE codproducto = codprod;
+        
+        SELECT tmp.correlativo, tmp.codproducto,p.descripcion,tmp.cantidad,tmp.precio_venta FROM detalle_temp tmp
+        INNER JOIN producto p 
+        ON tmp.codproducto = p.codproducto
+        WHERE tmp.token_user = token_user;
+    END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `procesar_compra` (IN `cod_usuario` INT, IN `cod_cliente` INT, IN `token` VARCHAR(50), IN `tipo_pago` INT, IN `id_caja` INT)   BEGIN
         DECLARE venta INT;
         
@@ -426,8 +450,8 @@ DELETE FROM detalle_temp_compra WHERE token_user = token;
         END IF;
     END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `procesar_venta` (IN `cod_usuario` INT, IN `cod_cliente` INT, IN `token` VARCHAR(50), IN `tipo_pago` INT, IN `id_caja` INT, IN `descuento` INT)   BEGIN
-    	DECLARE venta INT;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `procesar_venta` (IN `cod_usuario` INT, IN `cod_cliente` INT, IN `token` VARCHAR(50), IN `tipo_pago` INT, IN `id_caja` INT, IN `descuento` INT, IN `formaDP` VARCHAR(25), IN `mon` DECIMAL(10,2))   BEGIN
+    	DECLARE venta_id INT;
         
         DECLARE registros INT;
         DECLARE subtotal DECIMAL(10,2);
@@ -451,10 +475,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `procesar_venta` (IN `cod_usuario` I
         IF registros > 0 THEN
         	INSERT INTO tbl_tmp_tokenuser(cod_prod,cant_prod) SELECT codproducto,cantidad FROM detalle_temp WHERE token_user = token;
             
-            INSERT INTO venta(usuario,caja,codcliente,status,descuento) VALUES(cod_usuario,id_caja,cod_cliente,tipo_pago,descuento);
-            SET venta = LAST_INSERT_ID();
+            INSERT INTO venta(usuario,caja,codcliente,status,descuento,formaDPago,monto, abono) VALUES(cod_usuario,id_caja,cod_cliente,tipo_pago,descuento,formaDP,mon, 0);
+            SET venta_id = LAST_INSERT_ID();
             
-            INSERT INTO detalleventa(noventa,codproducto,cantidad,costo,precio_venta) SELECT(venta) as noventa, codproducto,cantidad,costo,precio_venta FROM detalle_temp WHERE token_user = token;
+            INSERT INTO detalleventa(noventa,codproducto,cantidad,costo,precio_venta, formaDPago, monto) SELECT venta_id, codproducto,cantidad,costo,precio_venta, formaDP, mon FROM detalle_temp WHERE token_user = token;
             
             WHILE a <= registros DO
             	SELECT cod_prod,cant_prod INTO tmp_cod_producto,tmp_cant_producto FROM tbl_tmp_tokenuser WHERE id = a;
@@ -465,10 +489,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `procesar_venta` (IN `cod_usuario` I
             
             SET subtotal = (SELECT SUM(cantidad * precio_venta) FROM detalle_temp WHERE token_user = token);
             SET total = subtotal - descuento;
-            UPDATE venta SET totalventa = total WHERE noventa = venta;
+            UPDATE venta SET totalventa = total WHERE noventa = venta_id;
             DELETE FROM detalle_temp WHERE token_user = token;
             TRUNCATE TABLE tbl_tmp_tokenuser;
-            SELECT * FROM venta WHERE noventa = venta;
+            SELECT * FROM venta WHERE noventa = venta_id;
             
         ELSE
         	SELECT 0;
@@ -502,6 +526,26 @@ CREATE TABLE `caja` (
 
 INSERT INTO `caja` (`id`, `fecha`, `inicio`, `ventas`, `abonos`, `egresos`, `creditos`, `total_efectivo`, `usuario`, `status`) VALUES
 (161, '2025-04-14 19:11:41', 500.00, NULL, NULL, NULL, NULL, NULL, 1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `categorias`
+--
+
+CREATE TABLE `categorias` (
+  `id_categoria` int(11) NOT NULL,
+  `categoria` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `categorias`
+--
+
+INSERT INTO `categorias` (`id_categoria`, `categoria`) VALUES
+(1, 'No asignado'),
+(2, 'Aceites'),
+(8, 'Lacteos');
 
 -- --------------------------------------------------------
 
@@ -586,11 +630,13 @@ INSERT INTO `configuracion` (`id`, `nit`, `nombre`, `razon_social`, `telefono`, 
 CREATE TABLE `detalleventa` (
   `correlativo` bigint(11) NOT NULL,
   `fecha` datetime NOT NULL DEFAULT current_timestamp(),
-  `noventa` bigint(11) DEFAULT NULL,
+  `noventa` bigint(11) NOT NULL,
   `codproducto` int(11) DEFAULT NULL,
   `cantidad` int(11) DEFAULT NULL,
   `costo` decimal(10,2) NOT NULL,
   `precio_venta` decimal(10,2) DEFAULT NULL,
+  `formaDPago` varchar(25) NOT NULL,
+  `monto` decimal(10,2) NOT NULL,
   `status` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
@@ -598,13 +644,20 @@ CREATE TABLE `detalleventa` (
 -- Volcado de datos para la tabla `detalleventa`
 --
 
-INSERT INTO `detalleventa` (`correlativo`, `fecha`, `noventa`, `codproducto`, `cantidad`, `costo`, `precio_venta`, `status`) VALUES
-(1543, '2025-04-16 19:53:09', 1188, 2012, 1, 110.00, 13.00, 2),
-(1544, '2025-04-16 19:59:09', 1189, 1326, 1, 207.00, 235.00, 1),
-(1545, '2025-04-16 19:59:09', 1189, 1327, 1, 193.50, 200.00, 1),
-(1546, '2025-04-18 20:26:58', 1190, 1326, 1, 207.00, 235.00, 1),
-(1547, '2025-04-21 01:35:15', 1191, 2087, 1, 250.00, 300.00, 1),
-(1548, '2025-04-21 04:36:01', 1192, 2012, 2, 110.00, 135.00, 1);
+INSERT INTO `detalleventa` (`correlativo`, `fecha`, `noventa`, `codproducto`, `cantidad`, `costo`, `precio_venta`, `formaDPago`, `monto`, `status`) VALUES
+(1543, '2025-04-16 19:53:09', 1188, 2012, 1, 110.00, 13.00, '', 0.00, 2),
+(1544, '2025-04-16 19:59:09', 1189, 1326, 1, 207.00, 235.00, '', 0.00, 1),
+(1545, '2025-04-16 19:59:09', 1189, 1327, 1, 193.50, 200.00, '', 0.00, 1),
+(1546, '2025-04-18 20:26:58', 1190, 1326, 1, 207.00, 235.00, '', 0.00, 1),
+(1547, '2025-04-21 01:35:15', 1191, 2087, 1, 250.00, 300.00, '', 0.00, 1),
+(1548, '2025-04-21 04:36:01', 1192, 2012, 2, 110.00, 135.00, '', 0.00, 1),
+(1550, '2025-05-06 03:18:35', 1197, 1326, 2, 207.00, 235.00, 'efectivo', 1200.00, 1),
+(1551, '2025-05-06 03:18:35', 1197, 2012, 1, 110.00, 135.00, 'efectivo', 1200.00, 1),
+(1552, '2025-05-06 12:25:44', 1198, 1326, 1, 207.00, 235.00, 'efectivo', 1200.00, 1),
+(1553, '2025-05-06 12:25:44', 1198, 2087, 2, 0.00, 300.00, 'efectivo', 1200.00, 1),
+(1554, '2025-05-07 21:37:12', 1199, 1326, 1, 207.00, 235.00, 'tarjeta', 1200.00, 1),
+(1555, '2025-05-07 21:40:42', 1200, 1326, 1, 207.00, 235.00, 'tarjeta', 1.00, 1),
+(1556, '2025-05-15 03:23:58', 1201, 1326, 1, 207.00, 235.00, 'tarjeta', 1.00, 1);
 
 -- --------------------------------------------------------
 
@@ -698,7 +751,7 @@ CREATE TABLE `entradas` (
   `cantidad` int(11) NOT NULL,
   `precio` decimal(10,2) NOT NULL,
   `usuario_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `entradas`
@@ -715,38 +768,39 @@ INSERT INTO `entradas` (`correlativo`, `nocompra`, `codproducto`, `fecha`, `cant
 
 CREATE TABLE `producto` (
   `codproducto` int(20) NOT NULL,
-  `codigo` varchar(20) NOT NULL,
-  `descripcion` varchar(100) DEFAULT NULL,
+  `codigo` varchar(20) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+  `descripcion` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `categoria` int(11) DEFAULT NULL,
   `proveedor` int(11) DEFAULT NULL,
   `costo` decimal(10,2) NOT NULL,
   `precio` decimal(10,2) DEFAULT NULL,
   `existencia` decimal(10,2) NOT NULL,
-  `foto` text DEFAULT NULL,
+  `foto` text CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   `date_add` datetime NOT NULL DEFAULT current_timestamp(),
   `status` int(11) DEFAULT 1,
   `usuario_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `producto`
 --
 
-INSERT INTO `producto` (`codproducto`, `codigo`, `descripcion`, `proveedor`, `costo`, `precio`, `existencia`, `foto`, `date_add`, `status`, `usuario_id`) VALUES
-(1325, 'DTSI20W5012', 'ACEITE 20W50 1.2 LTS', 1, 247.50, 280.00, 10.00, 'img_378a975b453639d824d34353a99bacbe.jpg', '2022-01-13 20:23:17', 1, 1),
-(1326, 'DTSI20W502R', 'ACEITE 20W50 1 LTS', 1, 207.00, 235.00, 14.00, 'img_dc399ccd8b13e81ce0326821c3b42ae9.jpg', '2022-01-13 20:24:46', 1, 1),
-(1327, 'DTSI20W503R', 'ACEITE 20W50 3R 1 LTS', 1, 193.50, 220.00, 6.00, 'img_08b718c6b302e9e9462e8a1a4449bc3c.jpg', '2022-01-13 20:25:52', 1, 1),
-(1552, '7042292656', 'ACEITE RALLYE 140', 1, 155.00, 175.00, 9.00, 'img_ffd0cdeb3006a16c5073673d846a5a39.jpg', '2022-02-11 16:11:35', 1, 1),
-(1553, 'MO402', 'ACEITE LION SAE 40', 1, 123.35, 155.00, 15.00, 'img_ea10e057fb6c6c85d052180b61762702.jpg', '2022-02-11 16:17:41', 1, 1),
-(1554, '15C9BF', 'ACEITE CASTROL CRB MAX 15W-40', 1, 960.74, 1080.00, 0.00, 'img_ec5afd5d4f512d8b6ccdf3838852fc29.jpg', '2022-02-11 16:19:04', 1, 1),
-(1555, '15D9C1', 'ACEITE CASTROL ACTEVO 4T 20W-50', 1, 237.46, 260.00, 8.00, 'img_b2adf96d67c8e73f4023fb450ae7f656.jpg', '2022-02-11 16:20:17', 1, 1),
-(1556, 'MN7104-1', 'ACEITE MANNOL MNTS4 15W-40 ', 1, 124.71, 165.00, 15.00, 'img_7eab08200a0eac1198a184f47a5ed9eb.jpg', '2022-02-11 16:22:20', 1, 1),
-(1557, '1030SNGF5BL', 'ACEITE ULTRA PLUS 10W-30', 1, 145.00, 170.00, 11.00, 'img_9005a00d6bfcebe68ac554e4d4a1e7e4.jpg', '2022-02-11 16:23:36', 1, 1),
-(1558, '800-10-4', 'LIQUIDO DE FRENO FREE ROJO', 1, 53.69, 65.00, 11.00, 'img_2d3f21673b30a6dcbdd75e36865f23f1.jpg', '2022-02-11 16:24:59', 1, 1),
-(1559, '800-10-3', 'LIQUIDO DE FRENO BLANCO', 1, 53.69, 65.00, 0.00, 'img_9bef084aa68a55d1b0476f89fab85543.jpg', '2022-02-11 16:25:43', 1, 1),
-(1560, '15D2C4', 'Aceite Castrol Essential 4T 20W-50', 1, 189.29, 230.00, 5.00, 'img_cc0f017a87be402fae0d8837ef3926d0.jpg', '2022-02-11 16:26:49', 1, 1),
-(2011, '1349', 'LUBRICANTE DE CADENA LIQUI MOLI', 1, 305.00, 360.00, 3.00, 'img_producto.png', '2022-07-08 18:54:38', 1, 1),
-(2012, 'ACEITE HIDRAULICO RO', '1350', 1, 110.00, 135.00, 0.50, 'img_producto.png', '2022-07-08 18:55:49', 1, 1),
-(2087, '1351', 'Aceite 2 tiempo', 1, 0.00, 300.00, 0.00, 'img_producto.png', '2022-09-15 15:04:09', 1, 1);
+INSERT INTO `producto` (`codproducto`, `codigo`, `descripcion`, `categoria`, `proveedor`, `costo`, `precio`, `existencia`, `foto`, `date_add`, `status`, `usuario_id`) VALUES
+(1325, 'DTSI20W5012', 'ACEITE 20W50 1.2 LTS', 1, 1, 247.50, 280.00, 10.00, 'img_378a975b453639d824d34353a99bacbe.jpg', '2022-01-13 20:23:17', 1, 1),
+(1326, 'DTSI20W502R', 'ACEITE 20W50 1 LTS', 1, 1, 207.00, 235.00, 10.00, 'img_dc399ccd8b13e81ce0326821c3b42ae9.jpg', '2022-01-13 20:24:46', 1, 1),
+(1327, 'DTSI20W503R', 'ACEITE 20W50 3R 1 LTS', 1, 1, 193.50, 220.00, 6.00, 'img_08b718c6b302e9e9462e8a1a4449bc3c.jpg', '2022-01-13 20:25:52', 1, 1),
+(1552, '7042292656', 'ACEITE RALLYE 140', 1, 1, 155.00, 175.00, 9.00, 'img_ffd0cdeb3006a16c5073673d846a5a39.jpg', '2022-02-11 16:11:35', 1, 1),
+(1553, 'MO402', 'ACEITE LION SAE 40', 1, 1, 123.35, 155.00, 15.00, 'img_ea10e057fb6c6c85d052180b61762702.jpg', '2022-02-11 16:17:41', 1, 1),
+(1554, '15C9BF', 'ACEITE CASTROL CRB MAX 15W-40', 1, 1, 960.74, 1080.00, 0.00, 'img_ec5afd5d4f512d8b6ccdf3838852fc29.jpg', '2022-02-11 16:19:04', 1, 1),
+(1555, '15D9C1', 'ACEITE CASTROL ACTEVO 4T 20W-50', 1, 1, 237.46, 260.00, 8.00, 'img_b2adf96d67c8e73f4023fb450ae7f656.jpg', '2022-02-11 16:20:17', 1, 1),
+(1556, 'MN7104-1', 'ACEITE MANNOL MNTS4 15W-40 ', 1, 1, 124.71, 165.00, 15.00, 'img_7eab08200a0eac1198a184f47a5ed9eb.jpg', '2022-02-11 16:22:20', 1, 1),
+(1557, '1030SNGF5BL', 'ACEITE ULTRA PLUS 10W-30', 1, 1, 145.00, 170.00, 11.00, 'img_9005a00d6bfcebe68ac554e4d4a1e7e4.jpg', '2022-02-11 16:23:36', 1, 1),
+(1558, '800-10-4', 'LIQUIDO DE FRENO FREE ROJO', 1, 1, 53.69, 65.00, 11.00, 'img_2d3f21673b30a6dcbdd75e36865f23f1.jpg', '2022-02-11 16:24:59', 1, 1),
+(1559, '800-10-3', 'LIQUIDO DE FRENO BLANCO', 1, 1, 53.69, 65.00, 0.00, 'img_9bef084aa68a55d1b0476f89fab85543.jpg', '2022-02-11 16:25:43', 1, 1),
+(1560, '15D2C4', 'Aceite Castrol Essential 4T 20W-50', 1, 1, 189.29, 230.00, 4.00, 'img_cc0f017a87be402fae0d8837ef3926d0.jpg', '2022-02-11 16:26:49', 1, 1),
+(2011, '1349', 'LUBRICANTE DE CADENA LIQUI MOLI', 8, 1, 305.00, 360.00, 3.00, 'img_producto.png', '2022-07-08 18:54:38', 1, 1),
+(2012, '1350', 'ACEITE HIDRAULICO RO', 2, 1, 110.00, 135.00, 1.00, 'img_producto.png', '2022-07-08 18:55:49', 1, 1),
+(2087, '1351', 'Aceite 2 tiempo', 2, 1, 0.00, 300.00, -1.00, 'img_producto.png', '2022-09-15 15:04:09', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -756,14 +810,14 @@ INSERT INTO `producto` (`codproducto`, `codigo`, `descripcion`, `proveedor`, `co
 
 CREATE TABLE `proveedor` (
   `codproveedor` int(11) NOT NULL,
-  `proveedor` varchar(100) DEFAULT NULL,
-  `contacto` varchar(100) DEFAULT NULL,
+  `proveedor` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `contacto` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   `telefono` bigint(11) DEFAULT NULL,
-  `direccion` text DEFAULT NULL,
+  `direccion` text CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   `date_add` datetime NOT NULL DEFAULT current_timestamp(),
   `status` int(11) DEFAULT 1,
   `usuario_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `proveedor`
@@ -780,8 +834,8 @@ INSERT INTO `proveedor` (`codproveedor`, `proveedor`, `contacto`, `telefono`, `d
 
 CREATE TABLE `rol` (
   `idrol` int(11) NOT NULL,
-  `rol` varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+  `rol` varchar(20) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `rol`
@@ -800,13 +854,13 @@ INSERT INTO `rol` (`idrol`, `rol`) VALUES
 
 CREATE TABLE `usuario` (
   `idusuario` int(11) NOT NULL,
-  `nombre` varchar(50) DEFAULT NULL,
-  `correo` varchar(100) DEFAULT NULL,
-  `usuario` varchar(15) DEFAULT NULL,
-  `clave` varchar(100) DEFAULT NULL,
+  `nombre` varchar(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `correo` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `usuario` varchar(15) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `clave` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   `rol` int(11) DEFAULT NULL,
   `status` int(11) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
@@ -828,21 +882,28 @@ CREATE TABLE `venta` (
   `caja` int(11) NOT NULL,
   `codcliente` int(11) DEFAULT NULL,
   `status` int(11) DEFAULT NULL,
-  `totalventa` decimal(10,2) NOT NULL,
+  `totalventa` decimal(10,2) DEFAULT NULL,
+  `formaDPago` varchar(25) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+  `monto` decimal(10,2) NOT NULL,
   `descuento` decimal(10,2) NOT NULL,
-  `abono` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+  `abono` decimal(10,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `venta`
 --
 
-INSERT INTO `venta` (`noventa`, `fecha`, `usuario`, `caja`, `codcliente`, `status`, `totalventa`, `descuento`, `abono`) VALUES
-(1188, '2025-04-16 19:53:09', 1, 161, 1, 2, 13.00, 0.00, 0.00),
-(1189, '2025-04-16 19:59:09', 1, 161, 1, 1, 435.00, 0.00, 0.00),
-(1190, '2025-04-18 20:26:58', 1, 161, 1, 1, 235.00, 0.00, 0.00),
-(1191, '2025-04-21 01:35:15', 1, 161, 1, 1, 300.00, 0.00, 0.00),
-(1192, '2025-04-21 04:36:01', 1, 161, 1, 1, 202.50, 0.00, 0.00);
+INSERT INTO `venta` (`noventa`, `fecha`, `usuario`, `caja`, `codcliente`, `status`, `totalventa`, `formaDPago`, `monto`, `descuento`, `abono`) VALUES
+(1188, '2025-04-16 19:53:09', 1, 161, 1, 2, 13.00, '', 0.00, 0.00, 0.00),
+(1189, '2025-04-16 19:59:09', 1, 161, 1, 1, 435.00, '', 0.00, 0.00, 0.00),
+(1190, '2025-04-18 20:26:58', 1, 161, 1, 1, 235.00, '', 0.00, 0.00, 0.00),
+(1191, '2025-04-21 01:35:15', 1, 161, 1, 1, 300.00, '', 0.00, 0.00, 0.00),
+(1192, '2025-04-21 04:36:01', 1, 161, 1, 1, 202.50, '', 0.00, 0.00, 0.00),
+(1197, '2025-05-06 03:18:35', 1, 161, 1, 1, 605.00, 'efectivo', 1200.00, 0.00, 0.00),
+(1198, '2025-05-06 12:25:44', 1, 161, 1, 1, 835.00, 'efectivo', 1200.00, 0.00, 0.00),
+(1199, '2025-05-07 21:37:12', 1, 161, 1, 1, 235.00, 'tarjeta', 1200.00, 0.00, 0.00),
+(1200, '2025-05-07 21:40:42', 1, 161, 1, 1, 235.00, 'tarjeta', 1.00, 0.00, 0.00),
+(1201, '2025-05-15 03:23:58', 1, 161, 1, 1, 235.00, 'tarjeta', 1.00, 0.00, 0.00);
 
 --
 -- Índices para tablas volcadas
@@ -854,6 +915,12 @@ INSERT INTO `venta` (`noventa`, `fecha`, `usuario`, `caja`, `codcliente`, `statu
 ALTER TABLE `caja`
   ADD PRIMARY KEY (`id`),
   ADD KEY `usuario` (`usuario`);
+
+--
+-- Indices de la tabla `categorias`
+--
+ALTER TABLE `categorias`
+  ADD PRIMARY KEY (`id_categoria`);
 
 --
 -- Indices de la tabla `cliente`
@@ -886,143 +953,56 @@ ALTER TABLE `detalleventa`
   ADD KEY `noventa` (`noventa`);
 
 --
--- Indices de la tabla `detalle_recibo`
---
-ALTER TABLE `detalle_recibo`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `noventa` (`noventa`),
-  ADD KEY `usuario` (`usuario`),
-  ADD KEY `caja` (`caja`);
-
---
--- Indices de la tabla `detalle_recibo_compra`
---
-ALTER TABLE `detalle_recibo_compra`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `nocompra` (`nocompra`),
-  ADD KEY `usuario` (`usuario`),
-  ADD KEY `caja` (`caja`);
-
---
 -- Indices de la tabla `detalle_temp`
 --
 ALTER TABLE `detalle_temp`
-  ADD PRIMARY KEY (`correlativo`),
-  ADD KEY `codproducto` (`codproducto`),
-  ADD KEY `token_user` (`token_user`);
+  ADD PRIMARY KEY (`correlativo`);
 
 --
 -- Indices de la tabla `detalle_temp_compra`
 --
 ALTER TABLE `detalle_temp_compra`
-  ADD PRIMARY KEY (`correlativo`),
-  ADD KEY `token_user` (`token_user`),
-  ADD KEY `codproducto` (`codproducto`);
-
---
--- Indices de la tabla `egresos`
---
-ALTER TABLE `egresos`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `caja` (`caja`);
+  ADD PRIMARY KEY (`correlativo`);
 
 --
 -- Indices de la tabla `entradas`
 --
 ALTER TABLE `entradas`
-  ADD PRIMARY KEY (`correlativo`),
-  ADD KEY `codproducto` (`codproducto`),
-  ADD KEY `usuario_id` (`usuario_id`),
-  ADD KEY `nocompra` (`nocompra`);
+  ADD PRIMARY KEY (`correlativo`);
 
 --
 -- Indices de la tabla `producto`
 --
 ALTER TABLE `producto`
-  ADD PRIMARY KEY (`codproducto`),
-  ADD KEY `proveedor` (`proveedor`),
-  ADD KEY `usuario_id` (`usuario_id`);
-
---
--- Indices de la tabla `proveedor`
---
-ALTER TABLE `proveedor`
-  ADD PRIMARY KEY (`codproveedor`),
-  ADD KEY `usuario_id` (`usuario_id`);
-
---
--- Indices de la tabla `rol`
---
-ALTER TABLE `rol`
-  ADD PRIMARY KEY (`idrol`);
-
---
--- Indices de la tabla `usuario`
---
-ALTER TABLE `usuario`
-  ADD PRIMARY KEY (`idusuario`),
-  ADD KEY `rol` (`rol`);
+  ADD KEY `fk_categoria` (`categoria`);
 
 --
 -- Indices de la tabla `venta`
 --
 ALTER TABLE `venta`
-  ADD PRIMARY KEY (`noventa`),
-  ADD KEY `usuario` (`usuario`),
-  ADD KEY `codcliente` (`codcliente`),
-  ADD KEY `caja` (`caja`);
+  ADD PRIMARY KEY (`noventa`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
 --
 
 --
--- AUTO_INCREMENT de la tabla `caja`
+-- AUTO_INCREMENT de la tabla `categorias`
 --
-ALTER TABLE `caja`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=162;
-
---
--- AUTO_INCREMENT de la tabla `cliente`
---
-ALTER TABLE `cliente`
-  MODIFY `idcliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
-
---
--- AUTO_INCREMENT de la tabla `compras`
---
-ALTER TABLE `compras`
-  MODIFY `nocompra` bigint(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=153;
-
---
--- AUTO_INCREMENT de la tabla `configuracion`
---
-ALTER TABLE `configuracion`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE `categorias`
+  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `detalleventa`
 --
 ALTER TABLE `detalleventa`
-  MODIFY `correlativo` bigint(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1549;
-
---
--- AUTO_INCREMENT de la tabla `detalle_recibo`
---
-ALTER TABLE `detalle_recibo`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
-
---
--- AUTO_INCREMENT de la tabla `detalle_recibo_compra`
---
-ALTER TABLE `detalle_recibo_compra`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `correlativo` bigint(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1557;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_temp`
 --
 ALTER TABLE `detalle_temp`
-  MODIFY `correlativo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2109;
+  MODIFY `correlativo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2123;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_temp_compra`
@@ -1031,139 +1011,26 @@ ALTER TABLE `detalle_temp_compra`
   MODIFY `correlativo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
 
 --
--- AUTO_INCREMENT de la tabla `egresos`
---
-ALTER TABLE `egresos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
-
---
 -- AUTO_INCREMENT de la tabla `entradas`
 --
 ALTER TABLE `entradas`
   MODIFY `correlativo` bigint(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=898;
 
 --
--- AUTO_INCREMENT de la tabla `producto`
---
-ALTER TABLE `producto`
-  MODIFY `codproducto` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2088;
-
---
--- AUTO_INCREMENT de la tabla `proveedor`
---
-ALTER TABLE `proveedor`
-  MODIFY `codproveedor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
-
---
--- AUTO_INCREMENT de la tabla `rol`
---
-ALTER TABLE `rol`
-  MODIFY `idrol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT de la tabla `usuario`
---
-ALTER TABLE `usuario`
-  MODIFY `idusuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
-
---
 -- AUTO_INCREMENT de la tabla `venta`
 --
 ALTER TABLE `venta`
-  MODIFY `noventa` bigint(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1193;
+  MODIFY `noventa` bigint(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1202;
 
 --
 -- Restricciones para tablas volcadas
 --
 
 --
--- Filtros para la tabla `caja`
---
-ALTER TABLE `caja`
-  ADD CONSTRAINT `caja_ibfk_1` FOREIGN KEY (`usuario`) REFERENCES `usuario` (`idusuario`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `cliente`
---
-ALTER TABLE `cliente`
-  ADD CONSTRAINT `cliente_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuario` (`idusuario`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `compras`
---
-ALTER TABLE `compras`
-  ADD CONSTRAINT `compras_ibfk_1` FOREIGN KEY (`codproveedor`) REFERENCES `proveedor` (`codproveedor`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `compras_ibfk_2` FOREIGN KEY (`usuario`) REFERENCES `usuario` (`idusuario`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `compras_ibfk_3` FOREIGN KEY (`caja`) REFERENCES `caja` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `detalleventa`
---
-ALTER TABLE `detalleventa`
-  ADD CONSTRAINT `detalleventa_ibfk_1` FOREIGN KEY (`noventa`) REFERENCES `venta` (`noventa`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `detalleventa_ibfk_2` FOREIGN KEY (`codproducto`) REFERENCES `producto` (`codproducto`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `detalle_recibo`
---
-ALTER TABLE `detalle_recibo`
-  ADD CONSTRAINT `detalle_recibo_ibfk_1` FOREIGN KEY (`noventa`) REFERENCES `venta` (`noventa`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `detalle_recibo_ibfk_2` FOREIGN KEY (`usuario`) REFERENCES `usuario` (`idusuario`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `detalle_recibo_ibfk_3` FOREIGN KEY (`caja`) REFERENCES `caja` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `detalle_recibo_compra`
---
-ALTER TABLE `detalle_recibo_compra`
-  ADD CONSTRAINT `detalle_recibo_compra_ibfk_1` FOREIGN KEY (`nocompra`) REFERENCES `compras` (`nocompra`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `detalle_recibo_compra_ibfk_2` FOREIGN KEY (`usuario`) REFERENCES `usuario` (`idusuario`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `detalle_recibo_compra_ibfk_3` FOREIGN KEY (`caja`) REFERENCES `caja` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `detalle_temp`
---
-ALTER TABLE `detalle_temp`
-  ADD CONSTRAINT `detalle_temp_ibfk_1` FOREIGN KEY (`codproducto`) REFERENCES `producto` (`codproducto`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `egresos`
---
-ALTER TABLE `egresos`
-  ADD CONSTRAINT `egresos_ibfk_1` FOREIGN KEY (`caja`) REFERENCES `caja` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `entradas`
---
-ALTER TABLE `entradas`
-  ADD CONSTRAINT `entradas_ibfk_2` FOREIGN KEY (`codproducto`) REFERENCES `producto` (`codproducto`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `entradas_ibfk_3` FOREIGN KEY (`nocompra`) REFERENCES `compras` (`nocompra`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
 -- Filtros para la tabla `producto`
 --
 ALTER TABLE `producto`
-  ADD CONSTRAINT `producto_ibfk_1` FOREIGN KEY (`proveedor`) REFERENCES `proveedor` (`codproveedor`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `producto_ibfk_2` FOREIGN KEY (`usuario_id`) REFERENCES `usuario` (`idusuario`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `proveedor`
---
-ALTER TABLE `proveedor`
-  ADD CONSTRAINT `proveedor_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuario` (`idusuario`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `usuario`
---
-ALTER TABLE `usuario`
-  ADD CONSTRAINT `usuario_ibfk_1` FOREIGN KEY (`rol`) REFERENCES `rol` (`idrol`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `venta`
---
-ALTER TABLE `venta`
-  ADD CONSTRAINT `venta_ibfk_1` FOREIGN KEY (`usuario`) REFERENCES `usuario` (`idusuario`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `venta_ibfk_2` FOREIGN KEY (`codcliente`) REFERENCES `cliente` (`idcliente`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `venta_ibfk_3` FOREIGN KEY (`caja`) REFERENCES `caja` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_categoria` FOREIGN KEY (`categoria`) REFERENCES `categorias` (`id_categoria`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
