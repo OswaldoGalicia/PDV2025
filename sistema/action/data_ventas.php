@@ -237,7 +237,7 @@
 							<td>'.$data["cliente"].'</td>
 							<td>'.$data["vendedor"].'</td>
 							<td class="estado">'.$estatus.'</td>
-							<td class="totalventa">'.$totalventa.'</td>
+							<td class="totalventa">'.$totalventa.'</td> 
 							<td>
 								<div class="div_acciones">';
 								if ($data['totalventa'] != 0) {
