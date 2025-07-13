@@ -23,7 +23,7 @@
 			if (isset($_POST['busqueda'])) {
 					$busqueda = mysqli_escape_string($conection,$_POST['busqueda']);
 
-					$sql_registe = mysqli_query($conection,"SELECT COUNT(*) as total_registro, f.noventa,f.fecha,f.totalventa,f.codcliente,f.status,f.abono,
+					$sql_registe = mysqli_query($conection,"SELECT COUNT(*) as total_registro, f.noventa,f.fecha,f.totalventa,f.codcliente,f.formaDPago,f.status,f.abono,
 															u.nombre as vendedor,
 															cl.nombre as cliente
 														FROM venta f
@@ -50,7 +50,7 @@
 			$desde = ($pagina-1) * $por_pagina;
 			$total_pagina = ceil($total_registro / $por_pagina);
 
-				$query = mysqli_query($conection,"SELECT f.noventa,f.fecha,f.totalventa,f.codcliente,f.status,f.abono,
+				$query = mysqli_query($conection,"SELECT f.noventa,f.fecha,f.totalventa,f.formaDPago,f.codcliente,f.status,f.abono,
 															u.nombre as vendedor,
 															cl.nombre as cliente
 														FROM venta f
@@ -100,7 +100,7 @@
 			$desde = ($pagina-1) * $por_pagina;
 			$total_pagina = ceil($total_registro / $por_pagina);
 
-				$query = mysqli_query($conection,"SELECT f.noventa,f.fecha,f.totalventa,f.codcliente,f.status,f.abono,
+				$query = mysqli_query($conection,"SELECT f.noventa,f.fecha,f.totalventa,f.codcliente,f.formaDPago,f.status,f.abono,
 															u.nombre as vendedor,
 															cl.nombre as cliente
 														FROM venta f
@@ -137,7 +137,7 @@
 			$desde = ($pagina-1) * $por_pagina;
 			$total_pagina = ceil($total_registro / $por_pagina);
 
-				$query = mysqli_query($conection,"SELECT f.noventa,f.fecha,f.totalventa,f.codcliente,f.status,f.abono,
+				$query = mysqli_query($conection,"SELECT f.noventa,f.fecha,f.totalventa,f.codcliente,f.formaDPago,f.status,f.abono,
 															u.nombre as vendedor,
 															cl.nombre as cliente
 														FROM venta f
@@ -182,7 +182,7 @@
 			$desde = ($pagina-1) * $por_pagina;
 			$total_pagina = ceil($total_registro / $por_pagina);
 
-				$query = mysqli_query($conection,"SELECT f.noventa,f.fecha,f.totalventa,f.codcliente,f.status,f.abono,
+				$query = mysqli_query($conection,"SELECT f.noventa,f.fecha,f.totalventa,f.codcliente,f.formaDPago,f.status,f.abono,
 															u.nombre as vendedor,
 															cl.nombre as cliente
 														FROM venta f
@@ -210,7 +210,8 @@
 											<th>Fecha / Hora</th>
 											<th>Cliente</th>
 											<th>Vendedor</th>
-											<th>Estado</th>
+											<th>Estado</th>                                                        
+											<th>Tipo de pago</th>
 											<th class="">Total Venta</th>
 											<th class="textcenter">Acciones</th>
 										</tr>';
@@ -237,6 +238,7 @@
 							<td>'.$data["cliente"].'</td>
 							<td>'.$data["vendedor"].'</td>
 							<td class="estado">'.$estatus.'</td>
+							<td>'.$data["formaDPago"].'</td>
 							<td class="totalventa">'.$totalventa.'</td> 
 							<td>
 								<div class="div_acciones">';

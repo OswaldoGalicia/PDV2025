@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 29-05-2025 a las 00:41:36
+-- Tiempo de generación: 13-07-2025 a las 11:47:48
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -545,7 +545,8 @@ CREATE TABLE `categorias` (
 INSERT INTO `categorias` (`id_categoria`, `categoria`) VALUES
 (1, 'No asignado'),
 (2, 'Aceites'),
-(8, 'Lacteos');
+(8, 'Lacteos'),
+(10, 'fghjk');
 
 -- --------------------------------------------------------
 
@@ -657,7 +658,27 @@ INSERT INTO `detalleventa` (`correlativo`, `fecha`, `noventa`, `codproducto`, `c
 (1553, '2025-05-06 12:25:44', 1198, 2087, 2, 0.00, 300.00, 'efectivo', 1200.00, 1),
 (1554, '2025-05-07 21:37:12', 1199, 1326, 1, 207.00, 235.00, 'tarjeta', 1200.00, 1),
 (1555, '2025-05-07 21:40:42', 1200, 1326, 1, 207.00, 235.00, 'tarjeta', 1.00, 1),
-(1556, '2025-05-15 03:23:58', 1201, 1326, 1, 207.00, 235.00, 'tarjeta', 1.00, 1);
+(1556, '2025-05-15 03:23:58', 1201, 1326, 1, 207.00, 235.00, 'tarjeta', 1.00, 1),
+(1557, '2025-07-03 06:43:27', 1202, 1325, 1, 247.50, 280.00, 'efectivo', 300.00, 1),
+(1558, '2025-07-11 13:08:16', 1203, 1325, 1, 247.50, 280.00, 'tarjeta', 1.00, 1),
+(1559, '2025-07-11 13:08:16', 1203, 1554, 1, 960.74, 1080.00, 'tarjeta', 1.00, 1),
+(1561, '2025-07-11 13:09:14', 1204, 1325, 1, 247.50, 280.00, 'efectivo', 300.00, 1),
+(1562, '2025-07-11 13:59:35', 1205, 1325, 1, 247.50, 280.00, 'efectivo', 300.00, 1),
+(1563, '2025-07-11 14:00:33', 1206, 1325, 1, 247.50, 280.00, 'efectivo', 300.00, 1),
+(1564, '2025-07-11 14:19:29', 1207, 1325, 1, 247.50, 280.00, 'efectivo', 350.00, 1),
+(1565, '2025-07-11 14:19:49', 1208, 1325, 2, 247.50, 280.00, 'tarjeta', 1.00, 1),
+(1566, '2025-07-11 14:20:02', 1209, 1325, 1, 247.50, 280.00, 'efectivo', 300.00, 1),
+(1567, '2025-07-11 14:26:52', 1210, 1325, 1, 247.50, 280.00, 'tarjeta', 1.00, 1),
+(1568, '2025-07-11 14:26:52', 1210, 1326, 1, 207.00, 235.00, 'tarjeta', 1.00, 1),
+(1570, '2025-07-11 15:59:36', 1211, 1325, 1, 247.50, 280.00, 'efectivo', 300.00, 1),
+(1571, '2025-07-11 16:01:03', 1212, 1325, 1, 247.50, 280.00, 'tarjeta', 1.00, 1),
+(1572, '2025-07-13 02:46:38', 1213, 1325, 2, 247.50, 280.00, 'credito', 1.00, 1),
+(1573, '2025-07-13 02:48:29', 1214, 1325, 1, 247.50, 280.00, 'credito', 1.00, 1),
+(1574, '2025-07-13 02:48:42', 1215, 1326, 1, 207.00, 235.00, 'credito', 1.00, 1),
+(1575, '2025-07-13 02:49:55', 1216, 1325, 1, 247.50, 280.00, 'efectivo', 1.00, 1),
+(1576, '2025-07-13 02:53:25', 1217, 1325, 1, 247.50, 280.00, 'credito', 1.00, 1),
+(1577, '2025-07-13 02:55:05', 1218, 1325, 1, 247.50, 280.00, 'credito', 1.00, 1),
+(1578, '2025-07-13 02:55:43', 1219, 1325, 1, 247.50, 280.00, 'credito', 1.00, 1);
 
 -- --------------------------------------------------------
 
@@ -707,6 +728,15 @@ CREATE TABLE `detalle_temp` (
   `costo` decimal(10,2) NOT NULL,
   `precio_venta` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_temp`
+--
+
+INSERT INTO `detalle_temp` (`correlativo`, `token_user`, `codproducto`, `cantidad`, `costo`, `precio_venta`) VALUES
+(2144, 'c4ca4238a0b923820dcc509a6f75849b', 1325, 1.00, 247.50, 280.00),
+(2145, 'c4ca4238a0b923820dcc509a6f75849b', 2087, 1.00, 0.00, 300.00),
+(2146, 'c4ca4238a0b923820dcc509a6f75849b', 1555, 2.00, 237.46, 260.00);
 
 -- --------------------------------------------------------
 
@@ -786,13 +816,13 @@ CREATE TABLE `producto` (
 --
 
 INSERT INTO `producto` (`codproducto`, `codigo`, `descripcion`, `categoria`, `proveedor`, `costo`, `precio`, `existencia`, `foto`, `date_add`, `status`, `usuario_id`) VALUES
-(1325, 'DTSI20W5012', 'ACEITE 20W50 1.2 LTS', 1, 1, 247.50, 280.00, 10.00, 'img_378a975b453639d824d34353a99bacbe.jpg', '2022-01-13 20:23:17', 1, 1),
-(1326, 'DTSI20W502R', 'ACEITE 20W50 1 LTS', 1, 1, 207.00, 235.00, 10.00, 'img_dc399ccd8b13e81ce0326821c3b42ae9.jpg', '2022-01-13 20:24:46', 1, 1),
+(1325, 'DTSI20W5012', 'ACEITE 20W50 1.2 LTS', 1, 1, 247.50, 280.00, -8.00, 'img_378a975b453639d824d34353a99bacbe.jpg', '2022-01-13 20:23:17', 1, 1),
+(1326, 'DTSI20W502R', 'ACEITE 20W50 1 LTS', 1, 1, 207.00, 235.00, 8.00, 'img_dc399ccd8b13e81ce0326821c3b42ae9.jpg', '2022-01-13 20:24:46', 1, 1),
 (1327, 'DTSI20W503R', 'ACEITE 20W50 3R 1 LTS', 1, 1, 193.50, 220.00, 6.00, 'img_08b718c6b302e9e9462e8a1a4449bc3c.jpg', '2022-01-13 20:25:52', 1, 1),
 (1552, '7042292656', 'ACEITE RALLYE 140', 1, 1, 155.00, 175.00, 9.00, 'img_ffd0cdeb3006a16c5073673d846a5a39.jpg', '2022-02-11 16:11:35', 1, 1),
 (1553, 'MO402', 'ACEITE LION SAE 40', 1, 1, 123.35, 155.00, 15.00, 'img_ea10e057fb6c6c85d052180b61762702.jpg', '2022-02-11 16:17:41', 1, 1),
-(1554, '15C9BF', 'ACEITE CASTROL CRB MAX 15W-40', 1, 1, 960.74, 1080.00, 0.00, 'img_ec5afd5d4f512d8b6ccdf3838852fc29.jpg', '2022-02-11 16:19:04', 1, 1),
-(1555, '15D9C1', 'ACEITE CASTROL ACTEVO 4T 20W-50', 1, 1, 237.46, 260.00, 8.00, 'img_b2adf96d67c8e73f4023fb450ae7f656.jpg', '2022-02-11 16:20:17', 1, 1),
+(1554, '15C9BF', 'ACEITE CASTROL CRB MAX 15W-40', 1, 1, 960.74, 1080.00, -1.00, 'img_ec5afd5d4f512d8b6ccdf3838852fc29.jpg', '2022-02-11 16:19:04', 1, 1),
+(1555, '15D9C1', 'ACEITE CASTROL ACTEVO 4T 20W-50', 1, 1, 237.46, 260.00, 6.00, 'img_b2adf96d67c8e73f4023fb450ae7f656.jpg', '2022-02-11 16:20:17', 1, 1),
 (1556, 'MN7104-1', 'ACEITE MANNOL MNTS4 15W-40 ', 1, 1, 124.71, 165.00, 15.00, 'img_7eab08200a0eac1198a184f47a5ed9eb.jpg', '2022-02-11 16:22:20', 1, 1),
 (1557, '1030SNGF5BL', 'ACEITE ULTRA PLUS 10W-30', 1, 1, 145.00, 170.00, 11.00, 'img_9005a00d6bfcebe68ac554e4d4a1e7e4.jpg', '2022-02-11 16:23:36', 1, 1),
 (1558, '800-10-4', 'LIQUIDO DE FRENO FREE ROJO', 1, 1, 53.69, 65.00, 11.00, 'img_2d3f21673b30a6dcbdd75e36865f23f1.jpg', '2022-02-11 16:24:59', 1, 1),
@@ -800,7 +830,7 @@ INSERT INTO `producto` (`codproducto`, `codigo`, `descripcion`, `categoria`, `pr
 (1560, '15D2C4', 'Aceite Castrol Essential 4T 20W-50', 1, 1, 189.29, 230.00, 4.00, 'img_cc0f017a87be402fae0d8837ef3926d0.jpg', '2022-02-11 16:26:49', 1, 1),
 (2011, '1349', 'LUBRICANTE DE CADENA LIQUI MOLI', 8, 1, 305.00, 360.00, 3.00, 'img_producto.png', '2022-07-08 18:54:38', 1, 1),
 (2012, '1350', 'ACEITE HIDRAULICO RO', 2, 1, 110.00, 135.00, 1.00, 'img_producto.png', '2022-07-08 18:55:49', 1, 1),
-(2087, '1351', 'Aceite 2 tiempo', 2, 1, 0.00, 300.00, -1.00, 'img_producto.png', '2022-09-15 15:04:09', 1, 1);
+(2087, '1351', 'Aceite 2 tiempo', 10, 1, 0.00, 300.00, -2.00, 'img_producto.png', '2022-09-15 15:04:09', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -902,8 +932,16 @@ INSERT INTO `venta` (`noventa`, `fecha`, `usuario`, `caja`, `codcliente`, `statu
 (1197, '2025-05-06 03:18:35', 1, 161, 1, 1, 605.00, 'efectivo', 1200.00, 0.00, 0.00),
 (1198, '2025-05-06 12:25:44', 1, 161, 1, 1, 835.00, 'efectivo', 1200.00, 0.00, 0.00),
 (1199, '2025-05-07 21:37:12', 1, 161, 1, 1, 235.00, 'tarjeta', 1200.00, 0.00, 0.00),
-(1200, '2025-05-07 21:40:42', 1, 161, 1, 1, 235.00, 'tarjeta', 1.00, 0.00, 0.00),
-(1201, '2025-05-15 03:23:58', 1, 161, 1, 1, 235.00, 'tarjeta', 1.00, 0.00, 0.00);
+(1210, '2025-07-11 14:26:52', 1, 161, 1, 1, 515.00, 'tarjeta', 1.00, 0.00, 0.00),
+(1211, '2025-07-11 15:59:36', 1, 161, 1, 1, 280.00, 'efectivo', 300.00, 0.00, 0.00),
+(1212, '2025-07-11 16:01:03', 1, 161, 1, 1, 280.00, 'tarjeta', 1.00, 0.00, 0.00),
+(1213, '2025-07-13 02:46:38', 1, 161, 1, 1, 560.00, 'credito', 1.00, 0.00, 0.00),
+(1214, '2025-07-13 02:48:29', 1, 161, 1, 1, 280.00, 'credito', 1.00, 0.00, 0.00),
+(1215, '2025-07-13 02:48:42', 1, 161, 1, 1, 235.00, 'credito', 1.00, 0.00, 0.00),
+(1216, '2025-07-13 02:49:55', 1, 161, 1, 1, 280.00, 'efectivo', 1.00, 0.00, 0.00),
+(1217, '2025-07-13 02:53:25', 1, 161, 1, 1, 280.00, 'credito', 1.00, 0.00, 0.00),
+(1218, '2025-07-13 02:55:05', 1, 161, 1, 1, 280.00, 'credito', 1.00, 0.00, 0.00),
+(1219, '2025-07-13 02:55:43', 1, 161, 1, 3, 280.00, 'credito', 1.00, 0.00, 0.00);
 
 --
 -- Índices para tablas volcadas
@@ -990,19 +1028,19 @@ ALTER TABLE `venta`
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `detalleventa`
 --
 ALTER TABLE `detalleventa`
-  MODIFY `correlativo` bigint(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1557;
+  MODIFY `correlativo` bigint(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1579;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_temp`
 --
 ALTER TABLE `detalle_temp`
-  MODIFY `correlativo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2123;
+  MODIFY `correlativo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2147;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_temp_compra`
@@ -1020,7 +1058,7 @@ ALTER TABLE `entradas`
 -- AUTO_INCREMENT de la tabla `venta`
 --
 ALTER TABLE `venta`
-  MODIFY `noventa` bigint(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1202;
+  MODIFY `noventa` bigint(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1220;
 
 --
 -- Restricciones para tablas volcadas

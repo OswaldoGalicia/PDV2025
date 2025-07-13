@@ -906,6 +906,18 @@ use FontLib\Table\Type\post;
 		}
 		exit;
 	   }
+	if ($_POST['action'] == 'totalVentaFP') {
+		$query = 'SELECT ROUND(SUM(cantidad * precio_venta),2) AS total FROM detalle_temp;';
+		$res = mysqli_query($conection, $query);
+	
+		if (!$res) {
+			echo 'error';
+			exit;
+		}
+	
+		$total = mysqli_fetch_assoc($res);
+		echo json_encode($total, JSON_UNESCAPED_UNICODE);
+	}
 
 	   	// Info Cliente
 	   	if ($_POST['action'] == 'editarCliente') {

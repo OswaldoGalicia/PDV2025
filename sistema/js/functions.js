@@ -1993,35 +1993,68 @@ function editarProductoVenta(){
 
 //indicar la forma de pago, deaqui se irá a facturar()
 function formaPago(){
-        $('.bodyModal').html('<form action="" method="post" name="formaPagoForm" id="formaPagoForm" onsubmit="event.preventDefault(); facturar();">'+
-                                '<h2 class="nameProducto">Forma de Pago</h2>'+
-                                '<h1> Seleccione el método de pago</h1>'+
+    var total = '';
+    $.ajax({
+        url: 'ajax.php',
+        type: 'POST',
+        async: true,
+        data: {action:'totalVentaFP'},
+        success: function (response){
+            if(response !='error'){
+                var info = JSON.parse(response);
+                total = info.total;
+
+                $('.bodyModal').html('<form action="" method="post" name="formaPagoForm" id="formaPagoForm" onsubmit="event.preventDefault(); facturar(); ">'+
+                                '<h2 class="nameProducto"> Seleccione el método de pago.</h2>'+
+                                '<h1> Total: $'+total+'</h1>'+
                     
                                 '<button class="botonesNuevos" type="button" onclick="seleccionaMetodoPago(\'efectivo\')">Efectivo</button>'+
                                 '<button class="botonesNuevos" type="submit" onclick="seleccionaMetodoPago(\'tarjeta\')">Tarjeta</button>'+
+                                '<button class="botonesNuevos" type="button" onclick="event.preventDefault(); seleccionaMetodoPago(\'credito\'); ">Credito</button>'+
                                 
                                 '<div class="hidden" id="metodoEfectivo">'+
-                                    '<input type="hidden" name="formaPago" id="formaPago" value="efectivo" required >'+
-                                    '<label for="monto_efectivo">Efectivo recibido:</label>'+
-                                    '<input type="number" step="any" name="monto_efectivo" id="monto_efectivo">'+
-                                    '<button class="botonesNuevos" type="submit" onclick="coloseModal();">Aceptar</button>'+
+                                    '<div>'+
+                                        '<input type="hidden" name="formaPago" id="formaPago" value="efectivo" required >'+
+                                        '<label for="monto_efectivo">Efectivo recibido:</label>'+
+                                        '<input type="number" step="any" name="monto_efectivo" id="monto_efectivo">'+
+                                    '</div>'+
+                                    '<button class="botonesNuevos" type="submit" onclick="coloseModal(); ">Aceptar</button>'+
                                 '</div>'+
                                 '<a href="#" class="btn_cancel" onclick="coloseModal();"><i class="fas fa-ban"></i> Regresar</a>'+            
                             '</form>');
         $('.modal').fadeIn();
+            }
+        },
+        error: function(error){
+            console.log('como me duele');
+        }
+    });
+        
 
 }
+
 
 function seleccionaMetodoPago(metodo){
     if(metodo === 'efectivo'){
         document.getElementById('metodoEfectivo').classList.remove('hidden');
         document.getElementById('formaPago').value='efectivo';
+        document.getElementById('tipo_pago').value=1;
         document.getElementById('monto_efectivo').setAttribute('required', null);
     }else if(metodo === 'tarjeta'){
         document.getElementById('metodoEfectivo').classList.add('hidden');
         document.getElementById('monto_efectivo').removeAttribute('required', null);
         document.getElementById('formaPago').value='tarjeta';
         coloseModal();
+    }else if(metodo === 'credito'){
+        if(document.getElementById('nom_cliente').value == ''){
+            coloseModal();
+            alert('Debe ingresar el nombre de un cliente y presionar enter para usar el credito.');
+        }else{
+            document.getElementById('metodoEfectivo').classList.remove('hidden');
+            document.getElementById('monto_efectivo').setAttribute('required', null);
+            document.getElementById('formaPago').value='credito';
+            document.getElementById('tipo_pago').value=3;
+        }
     }
 }
 
@@ -3625,8 +3658,9 @@ function listaVentas(busqueda,pagina,cantidad){
             var formaDPago = $('#formaPago').val();
             var monto = $('#monto_efectivo').val();
             if (descuento == '') {
-                descuento = 0;
+                descuento = 0; 
             }
+
             console.log("ID: "+codcliente + ' Status: '+status+' descuento: '+descuento + " formaPago:"+formaDPago);
             $.ajax({
                 url : 'ajax.php',
@@ -3640,6 +3674,9 @@ function listaVentas(busqueda,pagina,cantidad){
                     if (response != 'error')
                     {
                         var info = JSON.parse(response);
+                        if(info.formaDPago === 'efectivo'){
+                            cambio(info.totalventa, info.monto);
+                        }
                         if (comprobante ==1) {
                             generarPDFTicket(info.codcliente,info.noventa);
                         }else if(comprobante ==2){
@@ -3654,9 +3691,19 @@ function listaVentas(busqueda,pagina,cantidad){
                     console.log(error);
                 }
             });
+            
         }
     }
 
+    function cambio( pago, cambio){
+        $('bodyModal').html('<form action="event.preventDefault();">'+
+            '<h2>El cambio es:'+cambio - pago +' </h2>'+
+            '<a href="#" class="btn_cancel" onclick="coloseModal();"><i class="fas fa-ban"></i> Regresar</a>'+ 
+            '</form>'
+        );
+        $('.modal').fadeIn();
+     }
+     
     function anularVent(){
         var rows = $('#detalle_venta tr').length;
         if (rows > 0) 

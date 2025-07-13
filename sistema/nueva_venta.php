@@ -68,7 +68,7 @@
 							<option value="1">Ticket</option>
 							<option value="2">Factura</option>
 				</select>
-				<select name="tipo_pago" id="tipo_pago">
+				<select style="display:none" name="tipo_pago" id="tipo_pago">
 							<option value="1">Efectivo</option>
 							<option value="3">Crédito</option>
 						</select>
