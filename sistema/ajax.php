@@ -1867,12 +1867,26 @@ VALUES('$proveedor','$codigo','$producto','$costo','$precio','$usuario_id','$img
 	   		$token   = md5($_SESSION['idUser']);
 	   		$usuario = $_SESSION['idUser'];
 
+			// $debug = [
+			// 	'codproveedor' => $codproveedor,
+			// 	'tipo_pago' => $tipo_pago,
+			// 	'token' => $token,
+			// 	'usuario' => $usuario,
+			// 	'id_caja' => $id_caja
+			// ];
+			// echo json_encode($debug,JSON_UNESCAPED_UNICODE);
+			// exit;
+
 	   		$query = mysqli_query($conection,"SELECT * FROM detalle_temp_compra WHERE token_user = '$token'");
-	   		$result = mysqli_num_rows($query);
+
+			$result = mysqli_num_rows($query);
 	   		if ($result > 0)
 	   		 {
 			   	$query_procesar = mysqli_query($conection,"CALL procesar_compra($usuario,$codproveedor,'$token',$tipo_pago,$id_caja)");
-			   	$result_detalle = mysqli_num_rows($query_procesar);
+
+
+
+				$result_detalle = mysqli_num_rows($query_procesar);
 
 			   	if ($result_detalle > 0) {
 			   		$data = mysqli_fetch_assoc($query_procesar);

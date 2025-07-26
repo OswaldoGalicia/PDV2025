@@ -4489,6 +4489,7 @@ function comprar(){
                     if (response != 'error')
                     {
                         var info = JSON.parse(response);
+                        console.log(info);
                         //generarPDF(info.codcliente,info.nofactura)
                         //generarPDFTicket(info.codcliente,info.noventa)
                         location.reload();
@@ -4497,6 +4498,7 @@ function comprar(){
                     }
                 },
                 error: function(error){
+
                 }
             });
         }
