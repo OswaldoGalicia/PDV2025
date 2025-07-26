@@ -55,7 +55,8 @@
 														ON f.noventa = dt.noventa
 														INNER JOIN producto p
 														ON dt.codproducto = p.codproducto
-														WHERE f.noventa = $no_venta ");
+														WHERE f.noventa = $no_venta
+														ORDER BY p.categoria ");
 			$result_detalle = mysqli_num_rows($query_productos);
 
 			ob_start();
