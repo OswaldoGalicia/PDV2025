@@ -4044,7 +4044,7 @@ function nueva_factura_cobrar(){
                                             '<input type="hidden" name="id_client_saldo" id="id_client_saldo" value="'+saldo+'">'+
                                             '<p>¿Está seguro de realizar el siguiente pago?</p>'+
                                             '<h2>Nombre: '+info.cliente+'</h2>'+
-                                            '<h2>Saldo: C$ '+saldo+'</h2>'+
+                                            '<h2>Saldo: $ '+saldo+'</h2>'+
                                             '<label class="textcenter">Cantidad:</label>'+
                                             '<input class="textcenter" type="number" step="any" name="nuevoAbono" id="nuevaAbono" value="" placeholder="C$ 0.00" required><br>'+
                                             '<div class="alert alertAddProduct"></div>'+
