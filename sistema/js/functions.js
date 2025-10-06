@@ -3608,7 +3608,7 @@ function listaVentas(busqueda,pagina,cantidad){
                 data : {action:action,producto:codproducto,cantidad:cantidad,precio:precio},
                 success: function(response)
                 {
-                    //console.log(response);
+                    //console.log(response);63
                     if (response != 'error')
                      {
                         var info = JSON.parse(response);

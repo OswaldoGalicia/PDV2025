@@ -33,9 +33,9 @@
 										<input type="text" name="consulta" id="busquedaCli" placeholder="Buscar">
 									</form>
 									<a href="#" class="cerrarModalCl" onclick="coloseModal();">Aceptar</a>
-		 		<div class="containerTable" id="dataCliente"></div>
-		 		<div class="paginador" id="paginadorCliente"></div>
-		 	</section>			
+				<div class="containerTable" id="dataCliente"></div>
+				<div class="paginador" id="paginadorCliente"></div>
+			</section>			
 		</div>
 	</div>
 
